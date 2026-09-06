@@ -607,28 +607,31 @@ window.addEventListener('load', function() {
 
     // В) Тап по слову: Перевод + Озвучка
     if (event.target.classList.contains('toTranslate')) {
-      const textToSpeak = event.target.textContent;
-      
-      showTranslationInBottom("...");
-      translateGoogle(textToSpeak, (result) => showTranslationInBottom(result));
+    // Останавливаем плеер перед любым действием
+    if (!videoPlayer.paused) videoPlayer.pause();
 
-      if (speakOnTapCheckbox && speakOnTapCheckbox.checked) {
-        const language = selectSl ? selectSl.value : 'en'; 
-        
-        // Очищаем очередь, чтобы избежать заикания при быстрых тапах
-        window.speechSynthesis.cancel(); 
-        
-        const utterance = new SpeechSynthesisUtterance(textToSpeak);
-        utterance.lang = language;
-        
-        const voices = window.speechSynthesis.getVoices();
-        const targetVoice = voices.find(v => v.lang.startsWith(language));
-        if (targetVoice) utterance.voice = targetVoice;
-        
-        speechSynthesis.speak(utterance);
-      }
-      return;
+    const textToSpeak = event.target.textContent;
+    
+    showTranslationInBottom("...");
+    translateGoogle(textToSpeak, (result) => showTranslationInBottom(result));
+
+    if (speakOnTapCheckbox && speakOnTapCheckbox.checked) {
+      const language = selectSl ? selectSl.value : 'en'; 
+      
+      // Очищаем очередь, чтобы избежать заикания при быстрых тапах
+      window.speechSynthesis.cancel(); 
+      
+      const utterance = new SpeechSynthesisUtterance(textToSpeak);
+      utterance.lang = language;
+      
+      const voices = window.speechSynthesis.getVoices();
+      const targetVoice = voices.find(v => v.lang.startsWith(language));
+      if (targetVoice) utterance.voice = targetVoice;
+      
+      speechSynthesis.speak(utterance);
     }
+    return;
+  }
 
     // Г) Обработка клика по иконке DeepSeek[cite: 6]
     const aiBtn = event.target.closest('.aiTranslate');
@@ -682,12 +685,15 @@ window.addEventListener('load', function() {
     // Игнорируем нажатия, если пользователь вводит текст в инпуты (в настройках)
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
     
-    if (e.code === 'KeyA') {
-      document.getElementById('btnPrevSub').click(); // Назад[cite: 1]
+    if (e.code === 'Space') {
+      e.preventDefault(); // Блокируем стандартную прокрутку страницы пробелом
+      document.getElementById('btnPlayPause').click(); // Плей/Пауза
+    } else if (e.code === 'KeyA') {
+      document.getElementById('btnPrevSub').click(); // Назад
     } else if (e.code === 'KeyS') {
-      document.getElementById('btnRepeatSub').click(); // Повторить[cite: 1]
+      document.getElementById('btnRepeatSub').click(); // Повторить
     } else if (e.code === 'KeyD') {
-      document.getElementById('btnNextSub').click(); // Вперед[cite: 1]
+      document.getElementById('btnNextSub').click(); // Вперед
     }
   });
 
