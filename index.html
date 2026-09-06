@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ru" data-bs-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Mobile Lang Player</title>
+
+  <!-- Подключение Bootstrap 5 и Иконок -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  
+  <!-- Библиотека для парсинга Markdown ответов от DeepSeek -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+  <style>
+    /* Используем 100dvh для динамической адаптации под системные панели телефона */
+    body { 
+      height: 100dvh; 
+      overflow: hidden; 
+      display: flex; 
+      flex-direction: column; 
+      background-color: #121212; 
+      overscroll-behavior-y: none; /* Жестко блокирует pull-to-refresh */
+    }
+    
+    /* Стили для экрана плеера */
+    #playerScreen { display: flex; flex-direction: column; height: 100%; }
+    .subtitles-container { flex-grow: 1; overflow-y: auto; padding: 20px; font-size: 1.4rem; line-height: 1.6; }
+    
+    /* Выделение слов и субтитров */
+    .toTranslate { cursor: pointer; } 
+    .toTranslate:active { background-color: rgba(255,255,255,0.2); border-radius: 4px; }
+    .subtitleCurrent { color: #1D9BF5; font-weight: bold; }
+
+    /* Кнопки управления аудио */
+    .audio-controls .btn { font-size: 2rem; padding: 10px 20px; }
+
+    /* Безопасная зона (Safe Area) для системных кнопок телефона снизу */
+    #audioContainerBox {
+      padding-bottom: calc(1.5rem + env(safe-area-inset-bottom, 20px)) !important;
+    }
+
+    /* Стилизация ответов DeepSeek (Markdown) */
+    .markdown-body p { margin-top: 0; margin-bottom: 10px; line-height: 1.4; }
+    .markdown-body strong { color: #1D9BF5; }
+    .markdown-body ul { padding-left: 20px; margin-top: 5px; margin-bottom: 10px; }
+  </style>
+</head>
+<body>
+
+  <!-- ==================== ЭКРАН 1: ПЛЕЕР ==================== -->
+  <div id="playerScreen" class="w-100 h-100 d-flex flex-column">
+    
+    <!-- Видеоплеер (в самом верху, скрывается для аудио) -->
+    <div id="videoContainerBox" class="ratio ratio-16x9 bg-black flex-shrink-0" style="display: none;">
+      <video id="videoPlayer" playsinline></video>
+    </div>
+
+    <!-- Основные субтитры (занимают всё свободное место в центре) -->
+    <div class="subtitles-container flex-grow-1 overflow-auto" id="allTopSubs">
+      <div class="d-flex flex-column align-items-center justify-content-center h-100 text-center text-muted">
+        <i class="bi bi-file-earmark-play display-1 mb-3"></i>
+        <p class="small">Нажмите на шестеренку внизу,<br>чтобы загрузить медиафайл и субтитры</p>
+      </div>
+    </div>
+    
+    <!-- НИЖНИЙ БЛОК (Автоматически прижат ко дну) -->
+    <div class="mt-auto flex-shrink-0 bg-dark border-top z-3">
+      
+      <!-- Нижние субтитры (перевод) -->
+      <div class="p-2 text-center text-light border-bottom" id="videoSubtitlesBottom" style="min-height: 60px; font-size: 1.1rem;">
+        ...
+      </div>
+
+      <!-- Единая панель управления аудио и плеером -->
+      <div id="audioContainerBox" class="p-3 pb-4">
+        
+        <!-- Полоса прогресса -->
+        <div class="d-flex align-items-center mb-3">
+          <span id="currentTimeDisplay" class="text-muted small me-2">0:00</span>
+          <input type="range" class="form-range flex-grow-1" id="audioProgressBar" min="0" max="100" value="0">
+          <span id="durationDisplay" class="text-muted small ms-2">0:00</span>
+        </div>
+        
+        <!-- Кнопки управления + Настройки -->
+        <div class="audio-controls d-flex justify-content-between align-items-center px-2">
+          
+          <!-- Кнопка Настроек (слева) -->
+          <button class="btn btn-outline-secondary btn-sm" id="btnGoSettings" title="Настройки">
+            <i class="bi bi-gear-fill"></i>
+          </button>
+
+          <!-- Кнопки воспроизведения (по центру) -->
+          <div class="d-flex gap-4">
+            <button class="btn btn-link text-light p-0" id="btnPrevSub"><i class="bi bi-skip-backward-fill"></i></button>
+            <button class="btn btn-link text-warning p-0" id="btnRepeatSub"><i class="bi bi-arrow-counterclockwise"></i></button>
+            <button class="btn btn-link text-primary p-0" id="btnPlayPause"><i class="bi bi-play-circle-fill" id="playPauseIcon"></i></button>
+            <button class="btn btn-link text-light p-0" id="btnNextSub"><i class="bi bi-skip-forward-fill"></i></button>
+          </div>
+          
+          <!-- Пустой блок для симметричного выравнивания центральных кнопок -->
+          <div style="width: 33px;"></div> 
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ==================== ЭКРАН 2: НАСТРОЙКИ ==================== -->
+  <div id="settingsScreen" class="w-100 h-100 d-none d-flex flex-column bg-dark">
+    
+    <!-- Шапка настроек -->
+    <nav class="navbar navbar-dark bg-dark sticky-top border-bottom px-3 flex-shrink-0">
+      <div class="d-flex align-items-center w-100">
+        <button class="btn btn-outline-light me-3" id="btnGoPlayer">
+          <i class="bi bi-arrow-left"></i> Назад
+        </button>
+        <h5 class="mb-0 text-light">Настройки</h5>
+      </div>
+    </nav>
+
+    <!-- Тело настроек -->
+    <div class="container py-4 text-light flex-grow-1 overflow-auto pb-5">
+      
+      <!-- Карточка: Загрузка файлов -->
+      <div class="card bg-dark border-secondary mb-3">
+        <div class="card-body">
+          <h6 class="card-title text-primary"><i class="bi bi-folder2-open"></i> Загрузка файлов</h6>
+          
+          <div class="mb-3">
+            <label class="form-label small">Медиафайл (MP3 / MP4)</label>
+            <input class="form-control form-control-sm bg-dark text-light border-secondary" type="file" id="videoFile" accept="video/*,audio/*">
+          </div>
+          
+          <div class="mb-3">
+            <label class="form-label small">Субтитры (Основные - SRT / LRC)</label>
+            <input class="form-control form-control-sm bg-dark text-light border-secondary" type="file" id="subtitlesTop" accept=".srt,.lrc">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label small">Субтитры (Перевод - SRT / LRC)</label>
+            <input class="form-control form-control-sm bg-dark text-light border-secondary" type="file" id="subtitlesBottom" accept=".srt,.lrc">
+          </div>
+          
+          <div class="form-check form-switch mt-2">
+            <input class="form-check-input" type="checkbox" id="stopAfterSubtitle" checked>
+            <label class="form-check-label small" for="stopAfterSubtitle">Автопауза после фразы</label>
+          </div>
+          <div class="form-check form-switch mt-2">
+            <input class="form-check-input" type="checkbox" id="speakOnTap">
+            <label class="form-check-label small text-info" for="speakOnTap">Озвучивать слово по тапу</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Аккордеон: Глубокие настройки -->
+      <div class="accordion accordion-flush bg-dark" id="settingsAccordion">
+        
+        <!-- Языки (Синтезатор речи и Google) -->
+        <div class="accordion-item bg-dark border-secondary">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed bg-dark text-light" type="button" data-bs-toggle="collapse" data-bs-target="#collapseLang">
+              <i class="bi bi-globe me-2"></i> Языки перевода и озвучки
+            </button>
+          </h2>
+          <div id="collapseLang" class="accordion-collapse collapse" data-bs-parent="#settingsAccordion">
+            <div class="accordion-body">
+              <div class="mb-3">
+                <label class="form-label small">Изучаемый язык (Озвучка)</label>
+                <select class="form-select form-select-sm bg-dark text-light border-secondary" id="sl">
+                  <option value="en">Английский</option>
+                  <option value="de">Немецкий</option>
+                  <option value="fr">Французский</option>
+                  <option value="es">Испанский</option>
+                  <option value="it">Итальянский</option>
+                  <option value="pl">Польский</option>
+                </select>
+              </div>
+              <div>
+                <label class="form-label small">Родной язык (Перевод)</label>
+                <select class="form-select form-select-sm bg-dark text-light border-secondary" id="tl">
+                  <option value="ru">Русский</option>
+                  <option value="uk">Украинский</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- DeepSeek API -->
+        <div class="accordion-item bg-dark border-secondary">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed bg-dark text-light" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAI">
+              <i class="bi bi-robot me-2"></i> Нейросеть (DeepSeek)
+            </button>
+          </h2>
+          <div id="collapseAI" class="accordion-collapse collapse" data-bs-parent="#settingsAccordion">
+            <div class="accordion-body">
+              <div class="mb-3">
+                <label class="form-label small">API-ключ DeepSeek:</label>
+                <input type="password" class="form-control form-control-sm bg-dark text-light border-secondary" id="deepseekApiKey" placeholder="sk-...">
+              </div>
+              <div>
+                <label class="form-label small">Системная инструкция:</label>
+                <textarea class="form-control form-control-sm bg-dark text-light border-secondary" id="deepseekInstruction" rows="6"></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div> <!-- Конец аккордеона -->
+    </div>
+  </div>
+
+  <!-- ==================== ШТОРКА DEEPSEEK (Offcanvas) ==================== -->
+  <div class="offcanvas offcanvas-bottom bg-dark text-light" tabindex="-1" id="aiOffcanvas" style="height: 75dvh; border-top: 1px solid #444;">
+    <div class="offcanvas-header border-bottom border-secondary py-2">
+      <h6 class="offcanvas-title mb-0"><i class="bi bi-stars text-primary"></i> Лингвистический разбор</h6>
+      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+    </div>
+    <div class="offcanvas-body overflow-auto" id="aiOffcanvasBody">
+      <!-- Сюда JS загрузит ответ DeepSeek -->
+    </div>
+  </div>
+
+  <!-- Подключение скриптов -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="mobile_player.js?ver=31"></script>
+
+</body>
+</html>
