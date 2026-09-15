@@ -297,7 +297,11 @@ window.addEventListener('load', function() {
       subtitleDiv.style.marginBottom = '25px';*/ 
       // subtitleDiv.classList.add('subtitle', 'mb-4', 'mb-md-0');
       //subtitleDiv.classList.add('subtitle', 'mb-4', 'mb-md-1', 'border-bottom', 'border-secondary', 'border-opacity-25', 'pb-3', 'pb-md-2');
-      subtitleDiv.classList.add('subtitle', 'mb-2', 'mb-md-1', 'border-bottom', 'border-secondary', 'border-opacity-25', 'py-3', 'py-md-2');
+      subtitleDiv.classList.add('subtitle', 'mb-2', 'mb-md-1', 'border-bottom', 'border-secondary', 'border-opacity-25', 'py-3', 'py-md-2', 'mx-auto');
+
+      // ДОБАВЛЕНО: ограничение ширины для комфортного чтения на ПК
+      // subtitleDiv.style.maxWidth = '900px';
+      subtitleDiv.style.maxWidth = '80ch';
 
       allTopSubsContainer.appendChild(subtitleDiv);
     }
