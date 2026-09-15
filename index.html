@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-bs-theme="dark">
+<html lang="uk" data-bs-theme="dark">
 <head>
   <meta charset="UTF-8">
   <link rel="icon" href="favicon.svg" type="image/png">
@@ -66,17 +66,6 @@
     .subtitles-container::-webkit-scrollbar-thumb:hover {
       background-color: #666; /* Светлеет при наведении */
     }
-
-    /* Эффект наведения только для ПК (где есть мышь) */
-    /*@media (hover: hover) {
-      .subtitle:hover {
-        background-color: rgba(255, 255, 255, 0.03); /* Очень легкая белая подсветка */
-        border-radius: 8px;
-        transition: background-color 0.2s ease;
-      }
-    }*/
-
-
   </style>
 </head>
 <body>
@@ -93,7 +82,7 @@
     <div class="subtitles-container flex-grow-1 overflow-auto" id="allTopSubs">
       <div class="d-flex flex-column align-items-center justify-content-center h-100 text-center text-muted">
         <i class="bi bi-file-earmark-play display-1 mb-3"></i>
-        <p class="small">Нажмите на шестеренку внизу,<br>чтобы загрузить медиафайл и субтитры</p>
+        <p class="small" data-i18n="noMediaText">Натисніть на шестірню внизу,<br>щоб завантажити медіафайл та субтитри</p>
       </div>
     </div>
     
@@ -119,7 +108,7 @@
         <div class="audio-controls d-flex justify-content-between align-items-center px-2">
           
           <!-- Кнопка Настроек (слева) -->
-          <button class="btn btn-outline-secondary btn-sm" id="btnGoSettings" title="Настройки">
+          <button class="btn btn-outline-secondary btn-sm" id="btnGoSettings" title="Налаштування">
             <i class="bi bi-gear-fill"></i>
           </button>
 
@@ -138,50 +127,66 @@
     </div>
   </div>
 
-
   <!-- ==================== ЭКРАН 2: НАСТРОЙКИ ==================== -->
   <div id="settingsScreen" class="w-100 h-100 d-none d-flex flex-column bg-dark mx-auto border-start border-end border-secondary border-opacity-25" style="max-width: 900px;">
     
     <!-- Шапка настроек -->
     <nav class="navbar navbar-dark bg-dark sticky-top border-bottom px-3 flex-shrink-0">
       <div class="d-flex align-items-center w-100">
-        <button class="btn btn-outline-light me-3" id="btnGoPlayer">
+        <button class="btn btn-outline-light me-3" id="btnGoPlayer" data-i18n="backBtn">
           <i class="bi bi-arrow-left"></i> Назад
         </button>
-        <h5 class="mb-0 text-light">Настройки</h5>
+        <h5 class="mb-0 text-light" data-i18n="settingsTitle">Налаштування</h5>
       </div>
     </nav>
 
     <!-- Тело настроек -->
     <div class="container py-4 text-light flex-grow-1 overflow-auto pb-5">
+
+      <!-- Карточка: Язык интерфейса (Новый блок) -->
+      <div class="card bg-dark border-secondary mb-3">
+        <div class="card-body py-2">
+          <div class="d-flex justify-content-between align-items-center">
+            <label class="form-label small mb-0" data-i18n="uiLanguage">Мова інтерфейсу</label>
+            <select class="form-select form-select-sm bg-dark text-light border-secondary w-50" id="interfaceLang">
+              <option value="uk">Українська</option>
+              <option value="ru">Русский</option>
+              <option value="en">English</option>
+              <option value="de">Deutsch</option>
+              <option value="es">Español</option>
+              <option value="fr">Français</option>
+            </select>
+          </div>
+        </div>
+      </div>
       
       <!-- Карточка: Загрузка файлов -->
       <div class="card bg-dark border-secondary mb-3">
         <div class="card-body">
-          <h6 class="card-title text-primary"><i class="bi bi-folder2-open"></i> Загрузка файлов</h6>
+          <h6 class="card-title text-primary" data-i18n="uploadFilesTitle"><i class="bi bi-folder2-open"></i> Завантаження файлів</h6>
           
           <div class="mb-3">
-            <label class="form-label small">Медиафайл (MP3 / MP4)</label>
+            <label class="form-label small" data-i18n="mediaFileLabel">Медіафайл (MP3 / MP4)</label>
             <input class="form-control form-control-sm bg-dark text-light border-secondary" type="file" id="videoFile" accept="video/*,audio/*">
           </div>
           
           <div class="mb-3">
-            <label class="form-label small">Субтитры (Основные - SRT / LRC)</label>
+            <label class="form-label small" data-i18n="subtitlesTopLabel">Субтитри (Основні - SRT / LRC)</label>
             <input class="form-control form-control-sm bg-dark text-light border-secondary" type="file" id="subtitlesTop" accept=".srt,.lrc">
           </div>
 
           <div class="mb-3">
-            <label class="form-label small">Субтитры (Перевод - SRT / LRC)</label>
+            <label class="form-label small" data-i18n="subtitlesBottomLabel">Субтитри (Переклад - SRT / LRC)</label>
             <input class="form-control form-control-sm bg-dark text-light border-secondary" type="file" id="subtitlesBottom" accept=".srt,.lrc">
           </div>
           
           <div class="form-check form-switch mt-2">
             <input class="form-check-input" type="checkbox" id="stopAfterSubtitle" checked>
-            <label class="form-check-label small" for="stopAfterSubtitle">Автопауза после фразы</label>
+            <label class="form-check-label small" for="stopAfterSubtitle" data-i18n="autoPauseLabel">Автопауза після фрази</label>
           </div>
           <div class="form-check form-switch mt-2">
             <input class="form-check-input" type="checkbox" id="speakOnTap">
-            <label class="form-check-label small text-info" for="speakOnTap">Озвучивать слово по тапу</label>
+            <label class="form-check-label small text-info" for="speakOnTap" data-i18n="speakOnTapLabel">Озвучувати слово по тапу</label>
           </div>
         </div>
       </div>
@@ -192,28 +197,28 @@
         <!-- Языки (Синтезатор речи и Google) -->
         <div class="accordion-item bg-dark border-secondary">
           <h2 class="accordion-header">
-            <button class="accordion-button collapsed bg-dark text-light" type="button" data-bs-toggle="collapse" data-bs-target="#collapseLang">
-              <i class="bi bi-globe me-2"></i> Языки перевода и озвучки
+            <button class="accordion-button collapsed bg-dark text-light" type="button" data-bs-toggle="collapse" data-bs-target="#collapseLang" data-i18n="languagesTitle">
+              <i class="bi bi-globe me-2"></i> Мови перекладу та озвучення
             </button>
           </h2>
           <div id="collapseLang" class="accordion-collapse collapse" data-bs-parent="#settingsAccordion">
             <div class="accordion-body">
               <div class="mb-3">
-                <label class="form-label small">Изучаемый язык (Озвучка)</label>
+                <label class="form-label small" data-i18n="learningLangLabel">Мова вивчення (Озвучення)</label>
                 <select class="form-select form-select-sm bg-dark text-light border-secondary" id="sl">
-                  <option value="en">Английский</option>
-                  <option value="de">Немецкий</option>
-                  <option value="fr">Французский</option>
-                  <option value="es">Испанский</option>
-                  <option value="it">Итальянский</option>
-                  <option value="pl">Польский</option>
+                  <option value="en" data-i18n="langEn">Англійська</option>
+                  <option value="de" data-i18n="langDe">Німецька</option>
+                  <option value="fr" data-i18n="langFr">Французька</option>
+                  <option value="es" data-i18n="langEs">Іспанська</option>
+                  <option value="it" data-i18n="langIt">Італійська</option>
+                  <option value="pl" data-i18n="langPl">Польська</option>
                 </select>
               </div>
               <div>
-                <label class="form-label small">Родной язык (Перевод)</label>
+                <label class="form-label small" data-i18n="nativeLangLabel">Рідна мова (Переклад)</label>
                 <select class="form-select form-select-sm bg-dark text-light border-secondary" id="tl">
-                  <option value="ru">Русский</option>
-                  <option value="uk">Украинский</option>
+                  <option value="uk" data-i18n="langUk">Українська</option>
+                  <option value="ru" data-i18n="langRu">Російська</option>
                 </select>
               </div>
             </div>
@@ -223,18 +228,19 @@
         <!-- DeepSeek API -->
         <div class="accordion-item bg-dark border-secondary">
           <h2 class="accordion-header">
-            <button class="accordion-button collapsed bg-dark text-light" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAI">
-              <i class="bi bi-robot me-2"></i> Нейросеть (DeepSeek)
+            <button class="accordion-button collapsed bg-dark text-light" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAI" data-i18n="aiTitle">
+              <i class="bi bi-robot me-2"></i> Нейромережа (DeepSeek)
             </button>
           </h2>
           <div id="collapseAI" class="accordion-collapse collapse" data-bs-parent="#settingsAccordion">
             <div class="accordion-body">
               <div class="mb-3">
-                <label class="form-label small">API-ключ DeepSeek:</label>
-                <input type="password" class="form-control form-control-sm bg-dark text-light border-secondary" id="deepseekApiKey" placeholder="sk-...">
+                <label class="form-label small" data-i18n="apiKeyLabel">API-ключ DeepSeek:</label>
+                <!-- ТИП ПОЛЯ ИЗМЕНЕН С password НА text -->
+                <input type="text" class="form-control form-control-sm bg-dark text-light border-secondary" id="deepseekApiKey" placeholder="sk-...">
               </div>
               <div>
-                <label class="form-label small">Системная инструкция:</label>
+                <label class="form-label small" data-i18n="systemPromptLabel">Системна інструкція:</label>
                 <textarea class="form-control form-control-sm bg-dark text-light border-secondary" id="deepseekInstruction" rows="6"></textarea>
               </div>
             </div>
@@ -248,7 +254,7 @@
   <!-- ==================== ШТОРКА DEEPSEEK (Offcanvas) ==================== -->
   <div class="offcanvas offcanvas-bottom bg-dark text-light mx-auto border-start border-end border-secondary border-opacity-25" tabindex="-1" id="aiOffcanvas" style="height: 75dvh; border-top: 1px solid #444; max-width: 900px;">
     <div class="offcanvas-header border-bottom border-secondary py-2">
-      <h6 class="offcanvas-title mb-0"><i class="bi bi-stars text-primary"></i> Лингвистический разбор</h6>
+      <h6 class="offcanvas-title mb-0" data-i18n="analysisTitle"><i class="bi bi-stars text-primary"></i> Лінгвистичний розбір</h6>
       <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
     </div>
     <div class="offcanvas-body overflow-auto" id="aiOffcanvasBody">

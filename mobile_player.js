@@ -1,3 +1,266 @@
+const uiTranslations = {
+  uk: {
+    uiLanguage: "Мова інтерфейсу",
+    noMediaText: "Натисніть на шестірню внизу, щоб завантажити медіафайл та субтитри",
+    settingsTitle: "Налаштування",
+    backBtn: "Назад",
+    uploadFilesTitle: "Завантаження файлів",
+    mediaFileLabel: "Медіафайл (MP3 / MP4)",
+    subtitlesTopLabel: "Субтитри (Основні - SRT / LRC)",
+    subtitlesBottomLabel: "Субтитри (Переклад - SRT / LRC)",
+    autoPauseLabel: "Автопауза після фрази",
+    speakOnTapLabel: "Озвучувати слово по тапу",
+    languagesTitle: "Мови перекладу та озвучення",
+    learningLangLabel: "Мова вивчення (Озвучення)",
+    nativeLangLabel: "Рідна мова (Переклад)",
+    aiTitle: "Нейромережа (DeepSeek)",
+    apiKeyLabel: "API-ключ DeepSeek:",
+    systemPromptLabel: "Системна інструкція:",
+    analysisTitle: "Лінгвістичний розбір",
+
+    googleErrStruct: "Помилка структури відповіді",
+    googleErrParse: "Помилка обробки відповіді",
+    googleErrLimit: "Ліміт запитів Google. Зачекайте.",
+    googleErrServer: "Помилка сервера: ",
+    googleErrNet: "Блокування мережі (Помилка CORS / CGNAT)",
+    
+    // Названия языков в селекторах
+    langEn: "Англійська",
+    langDe: "Німецька",
+    langFr: "Французька",
+    langEs: "Іспанська",
+    langIt: "Італійська",
+    langPl: "Польська",
+    langRu: "Російська",
+    langUk: "Українська",
+
+    // Тексты внутри JavaScript (подсказки кнопок, алерты, статусы)
+    btnListen: "Слухати",
+    btnTranslate: "Перекласти",
+    btnAnalyze: "Розбір",
+    googleAnalyzing: "Аналіз Google...",
+    dsAnalyzing: "DeepSeek аналізує...",
+    enterApiKey: "Введіть API ключ DeepSeek у налаштуваннях.",
+    errorResponse: "Помилка відповіді:",
+    errorNetwork: "Мережева помилка:"
+  },
+  
+  ru: {
+    uiLanguage: "Язык интерфейса",
+    noMediaText: "Нажмите на шестеренку внизу, чтобы загрузить медиафайл и субтитры",
+    settingsTitle: "Настройки",
+    backBtn: "Назад",
+    uploadFilesTitle: "Загрузка файлов",
+    mediaFileLabel: "Медиафайл (MP3 / MP4)",
+    subtitlesTopLabel: "Субтитры (Основные - SRT / LRC)",
+    subtitlesBottomLabel: "Субтитры (Перевод - SRT / LRC)",
+    autoPauseLabel: "Автопауза после фразы",
+    speakOnTapLabel: "Озвучивать слово по тапу",
+    languagesTitle: "Языки перевода и озвучки",
+    learningLangLabel: "Изучаемый язык (Озвучка)",
+    nativeLangLabel: "Родной язык (Перевод)",
+    aiTitle: "Нейросеть (DeepSeek)",
+    apiKeyLabel: "API-ключ DeepSeek:",
+    systemPromptLabel: "Системная инструкция:",
+    analysisTitle: "Лингвистический разбор",
+
+    googleErrStruct: "Ошибка структуры ответа",
+    googleErrParse: "Ошибка обработки ответа",
+    googleErrLimit: "Лимит запросов Google. Подождите.",
+    googleErrServer: "Ошибка сервера: ",
+    googleErrNet: "Блокировка сети (Ошибка CORS / CGNAT)",
+
+    langEn: "Английский",
+    langDe: "Немецкий",
+    langFr: "Французский",
+    langEs: "Испанский",
+    langIt: "Итальянский",
+    langPl: "Польский",
+    langRu: "Русский",
+    langUk: "Украинский",
+    btnListen: "Слушать",
+    btnTranslate: "Перевести",
+    btnAnalyze: "Разбор",
+    googleAnalyzing: "Анализ Google...",
+    dsAnalyzing: "DeepSeek анализирует...",
+    enterApiKey: "Введите API ключ DeepSeek в настройках.",
+    errorResponse: "Ошибка ответа:",
+    errorNetwork: "Сетевая ошибка:"
+  },
+  
+  en: {
+    uiLanguage: "Interface Language",
+    noMediaText: "Click the gear icon below to upload a media file and subtitles",
+    settingsTitle: "Settings",
+    backBtn: "Back",
+    uploadFilesTitle: "Upload Files",
+    mediaFileLabel: "Media file (MP3 / MP4)",
+    subtitlesTopLabel: "Subtitles (Main - SRT / LRC)",
+    subtitlesBottomLabel: "Subtitles (Translation - SRT / LRC)",
+    autoPauseLabel: "Auto-pause after phrase",
+    speakOnTapLabel: "Speak word on tap",
+    languagesTitle: "Translation & TTS Languages",
+    learningLangLabel: "Learning Language (TTS)",
+    nativeLangLabel: "Native Language (Translation)",
+    aiTitle: "Neural Network (DeepSeek)",
+    apiKeyLabel: "DeepSeek API Key:",
+    systemPromptLabel: "System Instruction:",
+    analysisTitle: "Linguistic Analysis",
+
+    googleErrStruct: "Response structure error",
+    googleErrParse: "Response parsing error",
+    googleErrLimit: "Google request limit. Please wait.",
+    googleErrServer: "Server error: ",
+    googleErrNet: "Network blocked (CORS / CGNAT Error)",
+
+    langEn: "English",
+    langDe: "German",
+    langFr: "French",
+    langEs: "Spanish",
+    langIt: "Italian",
+    langPl: "Polish",
+    langRu: "Russian",
+    langUk: "Ukrainian",
+    btnListen: "Listen",
+    btnTranslate: "Translate",
+    btnAnalyze: "Analyze",
+    googleAnalyzing: "Google Analysis...",
+    dsAnalyzing: "DeepSeek is analyzing...",
+    enterApiKey: "Enter DeepSeek API key in settings.",
+    errorResponse: "Response Error:",
+    errorNetwork: "Network Error:"
+  },
+
+  de: {
+    uiLanguage: "Spracheneinstellungen",
+    noMediaText: "Klicken Sie auf das Zahnrad unten, um eine Mediendatei und Untertitel hochzuladen",
+    settingsTitle: "Einstellungen",
+    backBtn: "Zurück",
+    uploadFilesTitle: "Dateien hochladen",
+    mediaFileLabel: "Mediendatei (MP3 / MP4)",
+    subtitlesTopLabel: "Untertitel (Haupt - SRT / LRC)",
+    subtitlesBottomLabel: "Untertitel (Übersetzung - SRT / LRC)",
+    autoPauseLabel: "Automatische Pause nach Phrase",
+    speakOnTapLabel: "Wort bei Tippen vorlesen",
+    languagesTitle: "Übersetzungs- & TTS-Sprachen",
+    learningLangLabel: "Lernsprache (TTS)",
+    nativeLangLabel: "Muttersprache (Übersetzung)",
+    aiTitle: "Neuronales Netz (DeepSeek)",
+    apiKeyLabel: "DeepSeek API-Schlüssel:",
+    systemPromptLabel: "Systemanweisung:",
+    analysisTitle: "Linguistische Analyse",
+
+    googleErrStruct: "Fehler in der Antwortstruktur",
+    googleErrParse: "Fehler beim Verarbeiten der Antwort",
+    googleErrLimit: "Google-Anfragelimit erreicht. Bitte warten.",
+    googleErrServer: "Serverfehler: ",
+    googleErrNet: "Netzwerk blockiert (CORS / CGNAT Fehler)",
+
+    langEn: "Englisch",
+    langDe: "Deutsch",
+    langFr: "Französisch",
+    langEs: "Spanisch",
+    langIt: "Italienisch",
+    langPl: "Polnisch",
+    langRu: "Russisch",
+    langUk: "Ukrainisch",
+    btnListen: "Anhören",
+    btnTranslate: "Übersetzen",
+    btnAnalyze: "Analysieren",
+    googleAnalyzing: "Google Analyse...",
+    dsAnalyzing: "DeepSeek analysiert...",
+    enterApiKey: "Geben Sie den DeepSeek-API-Schlüssel in den Einstellungen ein.",
+    errorResponse: "Antwortfehler:",
+    errorNetwork: "Netzwerkfehler:"
+  },
+
+  es: {
+    uiLanguage: "Idioma de la interfaz",
+    noMediaText: "Haga clic en el engranaje a continuación para subir un archivo multimedia y subtítulos",
+    settingsTitle: "Configuración",
+    backBtn: "Atrás",
+    uploadFilesTitle: "Subir archivos",
+    mediaFileLabel: "Archivo multimedia (MP3 / MP4)",
+    subtitlesTopLabel: "Subtítulos (Principal - SRT / LRC)",
+    subtitlesBottomLabel: "Subtítulos (Traducción - SRT / LRC)",
+    autoPauseLabel: "Pausa automática tras la frase",
+    speakOnTapLabel: "Pronunciar palabra al tocar",
+    languagesTitle: "Idiomas de Traducción y TTS",
+    learningLangLabel: "Idioma de aprendizaje (TTS)",
+    nativeLangLabel: "Idioma nativo (Traducción)",
+    aiTitle: "Red Neuronal (DeepSeek)",
+    apiKeyLabel: "Clave API de DeepSeek:",
+    systemPromptLabel: "Instrucción del sistema:",
+    analysisTitle: "Análisis lingüístico",
+
+    googleErrStruct: "Error en la estructura de la respuesta",
+    googleErrParse: "Error al procesar la respuesta",
+    googleErrLimit: "Límite de solicitudes de Google. Por favor, espere.",
+    googleErrServer: "Error del servidor: ",
+    googleErrNet: "Red bloqueada (Error CORS / CGNAT)",
+
+    langEn: "Inglés",
+    langDe: "Alemán",
+    langFr: "Francés",
+    langEs: "Español",
+    langIt: "Italiano",
+    langPl: "Polaco",
+    langRu: "Ruso",
+    langUk: "Ucraniano",
+    btnListen: "Escuchar",
+    btnTranslate: "Traducir",
+    btnAnalyze: "Analizar",
+    googleAnalyzing: "Análisis de Google...",
+    dsAnalyzing: "DeepSeek está analizando...",
+    enterApiKey: "Introduzca la clave API de DeepSeek en configuración.",
+    errorResponse: "Error de respuesta:",
+    errorNetwork: "Error de red:"
+  },
+
+  fr: {
+    uiLanguage: "Langue de l'interface",
+    noMediaText: "Cliquez sur l'engrenage ci-dessous pour télécharger un fichier multimédia et des sous-titres",
+    settingsTitle: "Paramètres",
+    backBtn: "Retour",
+    uploadFilesTitle: "Télécharger des fichiers",
+    mediaFileLabel: "Fichier multimédia (MP3 / MP4)",
+    subtitlesTopLabel: "Sous-titres (Principal - SRT / LRC)",
+    subtitlesBottomLabel: "Sous-titres (Traduction - SRT / LRC)",
+    autoPauseLabel: "Pause automatique après la phrase",
+    speakOnTapLabel: "Prononcer le mot au toucher",
+    languagesTitle: "Langues de Traduction & TTS",
+    learningLangLabel: "Langue d'apprentissage (TTS)",
+    nativeLangLabel: "Langue maternelle (Traduction)",
+    aiTitle: "Réseau Neuronal (DeepSeek)",
+    apiKeyLabel: "Clé API DeepSeek:",
+    systemPromptLabel: "Instruction système:",
+    analysisTitle: "Analyse linguistique",
+
+    googleErrStruct: "Erreur de structure de la réponse",
+    googleErrParse: "Erreur d'analyse de la réponse",
+    googleErrLimit: "Limite de requêtes Google. Veuillez patienter.",
+    googleErrServer: "Erreur du serveur: ",
+    googleErrNet: "Réseau bloqué (Erreur CORS / CGNAT)",
+
+    langEn: "Anglais",
+    langDe: "Allemand",
+    langFr: "Français",
+    langEs: "Espagnol",
+    langIt: "Italien",
+    langPl: "Polonais",
+    langRu: "Russe",
+    langUk: "Ukrainien",
+    btnListen: "Écouter",
+    btnTranslate: "Traduire",
+    btnAnalyze: "Analyser",
+    googleAnalyzing: "Analyse Google...",
+    dsAnalyzing: "DeepSeek analyse...",
+    enterApiKey: "Entrez la clé API DeepSeek dans les paramètres.",
+    errorResponse: "Erreur de réponse:",
+    errorNetwork: "Erreur réseau:"
+  }
+};
+
 window.addEventListener('load', function() {  
   // ==========================================
   // 1. ИНИЦИАЛИЗАЦИЯ И НАСТРОЙКИ (LOCAL STORAGE)
@@ -206,21 +469,25 @@ window.addEventListener('load', function() {
 
   // Формирование строки субтитров (с правильными кнопками)[cite: 2]
   function wrapWordsInSpan(sentence) {
+    // Получаем текущий язык для перевода подсказок
+    const lang = localStorage.getItem('interfaceLang') || 'uk';
+    const t = uiTranslations[lang];
+
     const words = sentence.split(" ");
     const wrappedWords = words.map(word => `<span class="toTranslate">${word}</span>`);
     const safeSentence = escapeHtml(sentence);
 
-    const playBtn = `<button type="button" class="btn btn-outline-warning btn-sm rounded-pill px-4 jumpToSentence" title="Слушать">
+    const playBtn = `<button type="button" class="btn btn-outline-warning btn-sm rounded-pill px-4 jumpToSentence" title="${t.btnListen}">
       <i class="bi bi-play-fill" style="pointer-events: none; font-size: 1.2rem; line-height: 1;"></i>
     </button>`;
 
-    const googleBtn = `<button type="button" class="btn btn-outline-light btn-sm rounded-pill px-4 googleTranslate" sentence="${safeSentence}" title="Перевести">
+    const googleBtn = `<button type="button" class="btn btn-outline-light btn-sm rounded-pill px-4 googleTranslate" sentence="${safeSentence}" title="${t.btnTranslate}">
       <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="pointer-events: none; vertical-align: text-bottom;">
         <path d="M12.87 15.07l-2.54-2.51.03-.03c1.74-1.94 2.98-4.17 3.71-6.53H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z"/>
       </svg>
     </button>`;
 
-    const aiBtn = `<button type="button" class="btn btn-outline-info btn-sm rounded-pill px-4 aiTranslate" sentence="${safeSentence}" title="Разбор">
+    const aiBtn = `<button type="button" class="btn btn-outline-info btn-sm rounded-pill px-4 aiTranslate" sentence="${safeSentence}" title="${t.btnAnalyze}">
       <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16" style="pointer-events: none; vertical-align: text-bottom;">
         <path d="M7.657 6.247c.11-.33.576-.33.686 0l.203.61a2.46 2.46 0 0 0 1.585 1.585l.61.203c.33.11.33.576 0 .686l-.61.203a2.46 2.46 0 0 0-1.585 1.585l-.203.61c-.11.33-.576.33-.686 0l-.203-.61a2.46 2.46 0 0 0-1.585-1.585l-.61-.203c-.33-.11-.33-.576 0-.686l.61-.203a2.46 2.46 0 0 0 1.585-1.585l.203-.61zM11.457 4.144c.05-.152.261-.152.311 0l.11.33a1.13 1.13 0 0 0 .727.727l.33.11c.152.05.152.261 0 .311l-.33.11a1.13 1.13 0 0 0-.727.727l-.11.33c-.05.152-.261.152-.311 0l-.11-.33a1.13 1.13 0 0 0-.727-.727l-.33-.11c-.152-.05-.152-.261 0-.311l.33-.11a1.13 1.13 0 0 0 .727-.727l.11-.33z"/>
       </svg>
@@ -316,6 +583,10 @@ window.addEventListener('load', function() {
     const sl = selectSl ? selectSl.value : 'en';
     const tl = selectTl ? selectTl.value : 'ru';
     
+    // Получаем текущий язык для ошибок
+    const lang = localStorage.getItem('interfaceLang') || 'uk';
+    const t = uiTranslations[lang];
+    
     const xhr = new XMLHttpRequest();
     const url = "https://translate.googleapis.com/translate_a/single?client=gtx&sl=" + sl + "&tl=" + tl + "&dt=t&dt=at&dt=ex&q=" + encodeURIComponent(text.trim());
     
@@ -332,20 +603,20 @@ window.addEventListener('load', function() {
             }
             callback(translation);
           } else {
-            callback("Ошибка структуры ответа");
+            callback(t.googleErrStruct);
           }
         } catch (e) {
-          callback("Ошибка обработки ответа");
+          callback(t.googleErrParse);
         }
       } else if (xhr.status === 429) {
-        callback("Лимит запросов Google. Подождите.");
+        callback(t.googleErrLimit);
       } else {
-        callback("Ошибка сервера: " + xhr.status);
+        callback(t.googleErrServer + xhr.status);
       }
     };
     
     xhr.onerror = function() {
-      callback("Блокировка сети (Ошибка CORS / CGNAT)");
+      callback(t.googleErrNet);
     };
     
     xhr.send();
@@ -588,6 +859,9 @@ window.addEventListener('load', function() {
   const aiOffcanvasBody = document.getElementById('aiOffcanvasBody');
 
   allTopSubsContainer.addEventListener('click', async function(event) {
+    // Получаем переводы для кликов
+    const lang = localStorage.getItem('interfaceLang') || 'uk';
+    const t = uiTranslations[lang];
     
     // А) Быстрый переход к предложению (Иконка Play)
     const jumpBtn = event.target.closest('.jumpToSentence');
@@ -600,23 +874,20 @@ window.addEventListener('load', function() {
       return;
     }
 
-    // ОБЩАЯ ПАУЗА: Останавливаем видео перед любым другим действием (перевод фразы, слова или разбор AI)
+    // ОБЩАЯ ПАУЗА: Останавливаем видео перед любым другим действием
     if (!videoPlayer.paused) videoPlayer.pause();
 
     // Б) Перевод ВСЕГО предложения в Google
     const googleBtn = event.target.closest('.googleTranslate');
     if (googleBtn) {
       const sentence = googleBtn.getAttribute('sentence');
-      showTranslationInBottom("Анализ Google...");
+      showTranslationInBottom(t.googleAnalyzing); // <--- ДИНАМИЧЕСКИЙ ТЕКСТ
       translateGoogle(sentence, (result) => showTranslationInBottom(result));
       return;
     }
 
     // В) Тап по слову: Перевод + Озвучка
     if (event.target.classList.contains('toTranslate')) {
-      // Останавливаем плеер перед любым действием
-      // if (!videoPlayer.paused) videoPlayer.pause();
-
       const textToSpeak = event.target.textContent;
       
       showTranslationInBottom("...");
@@ -625,7 +896,6 @@ window.addEventListener('load', function() {
       if (speakOnTapCheckbox && speakOnTapCheckbox.checked) {
         const language = selectSl ? selectSl.value : 'en'; 
         
-        // Очищаем очередь, чтобы избежать заикания при быстрых тапах
         window.speechSynthesis.cancel(); 
         
         const utterance = new SpeechSynthesisUtterance(textToSpeak);
@@ -637,22 +907,20 @@ window.addEventListener('load', function() {
         
         speechSynthesis.speak(utterance);
       }
-    return;
-  }
+      return;
+    }
 
-    // Г) Обработка клика по иконке DeepSeek[cite: 6]
+    // Г) Обработка клика по иконке DeepSeek
     const aiBtn = event.target.closest('.aiTranslate');
     if (aiBtn && aiOffcanvas) {
-      // if (!videoPlayer.paused) videoPlayer.pause(); 
-
       const sentence = aiBtn.getAttribute('sentence');
       const apiKey = deepseekApiKeyInput ? deepseekApiKeyInput.value.trim() : localStorage.getItem('deepseekApiKey');
       const instruction = deepseekInstructionInput ? deepseekInstructionInput.value.trim() : defaultInstruction;
 
-      if (!apiKey) { alert("Введите API ключ DeepSeek в настройках."); return; }
+      if (!apiKey) { alert(t.enterApiKey); return; } // <--- ДИНАМИЧЕСКИЙ ТЕКСТ
 
       aiOffcanvas.show();
-      aiOffcanvasBody.innerHTML = '<div class="text-center mt-5"><div class="spinner-border text-primary" role="status"></div><p class="mt-3 text-light fw-bold">DeepSeek анализирует...</p></div>';
+      aiOffcanvasBody.innerHTML = `<div class="text-center mt-5"><div class="spinner-border text-primary" role="status"></div><p class="mt-3 text-light fw-bold">${t.dsAnalyzing}</p></div>`; // <--- ДИНАМИЧЕСКИЙ ТЕКСТ
 
       try {
         const response = await fetch('https://api.deepseek.com/chat/completions', {
@@ -680,8 +948,8 @@ window.addEventListener('load', function() {
             <div class="text-info fw-bold mb-3 border-bottom border-secondary pb-2" style="font-size: 1.2rem;">${escapeHtml(sentence)}</div>
             <div class="markdown-body text-light" style="font-size: 1rem; line-height: 1.5;">${htmlAnswer}</div>
           `;
-        } else { aiOffcanvasBody.innerHTML = `<div class="alert alert-danger">Ошибка ответа: ${JSON.stringify(data)}</div>`; }
-      } catch (error) { aiOffcanvasBody.innerHTML = `<div class="alert alert-danger">Сетевая ошибка: ${error.message}</div>`; }
+        } else { aiOffcanvasBody.innerHTML = `<div class="alert alert-danger">${t.errorResponse} ${JSON.stringify(data)}</div>`; } // <--- ДИНАМИЧЕСКИЙ ТЕКСТ
+      } catch (error) { aiOffcanvasBody.innerHTML = `<div class="alert alert-danger">${t.errorNetwork} ${error.message}</div>`; } // <--- ДИНАМИЧЕСКИЙ ТЕКСТ
     }
   });
 
@@ -719,6 +987,45 @@ window.addEventListener('load', function() {
     // Опционально: можно показать пользователю легкое уведомление, что выход заблокирован
     console.warn("Блокировка случайного выхода назад");
   });
+
+
+
+
+  const interfaceLangSelect = document.getElementById('interfaceLang');
+
+  // Функция обновления текста
+  function applyUiLanguage(lang) {
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      if (uiTranslations[lang] && uiTranslations[lang][key]) {
+        // Сохраняем иконки, если они есть внутри элемента
+        if (el.querySelector('i')) {
+          el.innerHTML = el.querySelector('i').outerHTML + ' ' + uiTranslations[lang][key];
+        } else {
+          el.textContent = uiTranslations[lang][key];
+        }
+      }
+    });
+  }
+
+  // Загрузка сохраненного языка или установка Украинского по умолчанию
+  const savedLang = localStorage.getItem('interfaceLang') || 'uk';
+  if (interfaceLangSelect) {
+    interfaceLangSelect.value = savedLang;
+  }
+  applyUiLanguage(savedLang);
+
+  // Слушатель изменения языка
+  if (interfaceLangSelect) {
+    interfaceLangSelect.addEventListener('change', (e) => {
+      const selectedLang = e.target.value;
+      localStorage.setItem('interfaceLang', selectedLang);
+      applyUiLanguage(selectedLang);
+    });
+  }
+
+
+
 
 });
 
