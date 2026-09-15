@@ -596,6 +596,9 @@ window.addEventListener('load', function() {
       return;
     }
 
+    // ОБЩАЯ ПАУЗА: Останавливаем видео перед любым другим действием (перевод фразы, слова или разбор AI)
+    if (!videoPlayer.paused) videoPlayer.pause();
+
     // Б) Перевод ВСЕГО предложения в Google
     const googleBtn = event.target.closest('.googleTranslate');
     if (googleBtn) {
@@ -607,36 +610,36 @@ window.addEventListener('load', function() {
 
     // В) Тап по слову: Перевод + Озвучка
     if (event.target.classList.contains('toTranslate')) {
-    // Останавливаем плеер перед любым действием
-    if (!videoPlayer.paused) videoPlayer.pause();
+      // Останавливаем плеер перед любым действием
+      // if (!videoPlayer.paused) videoPlayer.pause();
 
-    const textToSpeak = event.target.textContent;
-    
-    showTranslationInBottom("...");
-    translateGoogle(textToSpeak, (result) => showTranslationInBottom(result));
+      const textToSpeak = event.target.textContent;
+      
+      showTranslationInBottom("...");
+      translateGoogle(textToSpeak, (result) => showTranslationInBottom(result));
 
-    if (speakOnTapCheckbox && speakOnTapCheckbox.checked) {
-      const language = selectSl ? selectSl.value : 'en'; 
-      
-      // Очищаем очередь, чтобы избежать заикания при быстрых тапах
-      window.speechSynthesis.cancel(); 
-      
-      const utterance = new SpeechSynthesisUtterance(textToSpeak);
-      utterance.lang = language;
-      
-      const voices = window.speechSynthesis.getVoices();
-      const targetVoice = voices.find(v => v.lang.startsWith(language));
-      if (targetVoice) utterance.voice = targetVoice;
-      
-      speechSynthesis.speak(utterance);
-    }
+      if (speakOnTapCheckbox && speakOnTapCheckbox.checked) {
+        const language = selectSl ? selectSl.value : 'en'; 
+        
+        // Очищаем очередь, чтобы избежать заикания при быстрых тапах
+        window.speechSynthesis.cancel(); 
+        
+        const utterance = new SpeechSynthesisUtterance(textToSpeak);
+        utterance.lang = language;
+        
+        const voices = window.speechSynthesis.getVoices();
+        const targetVoice = voices.find(v => v.lang.startsWith(language));
+        if (targetVoice) utterance.voice = targetVoice;
+        
+        speechSynthesis.speak(utterance);
+      }
     return;
   }
 
     // Г) Обработка клика по иконке DeepSeek[cite: 6]
     const aiBtn = event.target.closest('.aiTranslate');
     if (aiBtn && aiOffcanvas) {
-      if (!videoPlayer.paused) videoPlayer.pause(); 
+      // if (!videoPlayer.paused) videoPlayer.pause(); 
 
       const sentence = aiBtn.getAttribute('sentence');
       const apiKey = deepseekApiKeyInput ? deepseekApiKeyInput.value.trim() : localStorage.getItem('deepseekApiKey');
