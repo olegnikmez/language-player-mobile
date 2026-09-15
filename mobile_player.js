@@ -301,7 +301,7 @@ window.addEventListener('load', function() {
 
       // ДОБАВЛЕНО: ограничение ширины для комфортного чтения на ПК
       // subtitleDiv.style.maxWidth = '900px';
-      subtitleDiv.style.maxWidth = '80ch';
+      // subtitleDiv.style.maxWidth = '80ch';
 
       allTopSubsContainer.appendChild(subtitleDiv);
     }

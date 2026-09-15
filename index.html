@@ -20,8 +20,14 @@
       overflow: hidden; 
       display: flex; 
       flex-direction: column; 
-      background-color: #121212; 
+      background-color: #1a1a1c; 
       overscroll-behavior-y: none; /* Жестко блокирует pull-to-refresh */
+    }
+
+    /* Принудительно задаем темный цвет для центральной колонки и добавляем тень */
+    #playerScreen, #settingsScreen, #aiOffcanvas {
+      background-color: #0a0a0a !important; /* Глубокий темный цвет для самого приложения */
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.5); /* Мягкая тень по краям колонки */
     }
     
     /* Стили для экрана плеера */
@@ -31,7 +37,7 @@
     /* Выделение слов и субтитров */
     .toTranslate { cursor: pointer; } 
     .toTranslate:active { background-color: rgba(255,255,255,0.2); border-radius: 4px; }
-    .subtitleCurrent { color: #1D9BF5; font-weight: bold; }
+    .subtitleCurrent { color: #1D9BF5 }
 
     /* Кнопки управления аудио */
     .audio-controls .btn { font-size: 2rem; padding: 10px 20px; }
@@ -45,12 +51,38 @@
     .markdown-body p { margin-top: 0; margin-bottom: 10px; line-height: 1.4; }
     .markdown-body strong { color: #1D9BF5; }
     .markdown-body ul { padding-left: 20px; margin-top: 5px; margin-bottom: 10px; }
+
+    /* Кастомный скроллбар для ПК */
+    .subtitles-container::-webkit-scrollbar {
+      width: 8px; /* Тонкий скроллбар */
+    }
+    .subtitles-container::-webkit-scrollbar-track {
+      background: transparent; /* Прозрачный фон дорожки */
+    }
+    .subtitles-container::-webkit-scrollbar-thumb {
+      background-color: #444; /* Темно-серый ползунок */
+      border-radius: 10px; /* Скругленные края */
+    }
+    .subtitles-container::-webkit-scrollbar-thumb:hover {
+      background-color: #666; /* Светлеет при наведении */
+    }
+
+    /* Эффект наведения только для ПК (где есть мышь) */
+    /*@media (hover: hover) {
+      .subtitle:hover {
+        background-color: rgba(255, 255, 255, 0.03); /* Очень легкая белая подсветка */
+        border-radius: 8px;
+        transition: background-color 0.2s ease;
+      }
+    }*/
+
+
   </style>
 </head>
 <body>
 
   <!-- ==================== ЭКРАН 1: ПЛЕЕР ==================== -->
-  <div id="playerScreen" class="w-100 h-100 d-flex flex-column">
+  <div id="playerScreen" class="w-100 h-100 d-flex flex-column mx-auto border-start border-end border-secondary border-opacity-25" style="max-width: 900px;">
     
     <!-- Видеоплеер (в самом верху, скрывается для аудио) -->
     <div id="videoContainerBox" class="ratio ratio-16x9 bg-black flex-shrink-0" style="display: none;">
@@ -108,7 +140,7 @@
 
 
   <!-- ==================== ЭКРАН 2: НАСТРОЙКИ ==================== -->
-  <div id="settingsScreen" class="w-100 h-100 d-none d-flex flex-column bg-dark">
+  <div id="settingsScreen" class="w-100 h-100 d-none d-flex flex-column bg-dark mx-auto border-start border-end border-secondary border-opacity-25" style="max-width: 900px;">
     
     <!-- Шапка настроек -->
     <nav class="navbar navbar-dark bg-dark sticky-top border-bottom px-3 flex-shrink-0">
@@ -214,7 +246,7 @@
   </div>
 
   <!-- ==================== ШТОРКА DEEPSEEK (Offcanvas) ==================== -->
-  <div class="offcanvas offcanvas-bottom bg-dark text-light" tabindex="-1" id="aiOffcanvas" style="height: 75dvh; border-top: 1px solid #444;">
+  <div class="offcanvas offcanvas-bottom bg-dark text-light mx-auto border-start border-end border-secondary border-opacity-25" tabindex="-1" id="aiOffcanvas" style="height: 75dvh; border-top: 1px solid #444; max-width: 900px;">
     <div class="offcanvas-header border-bottom border-secondary py-2">
       <h6 class="offcanvas-title mb-0"><i class="bi bi-stars text-primary"></i> Лингвистический разбор</h6>
       <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
