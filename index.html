@@ -120,8 +120,19 @@
             <button class="btn btn-link text-light p-0" id="btnNextSub"><i class="bi bi-skip-forward-fill"></i></button>
           </div>
           
-          <!-- Пустой блок для симметричного выравнивания центральных кнопок -->
-          <div style="width: 33px;"></div> 
+          <!-- Правый блок кнопок (Очистка галочек + Режимы зацикливания) -->
+          <div class="d-flex align-items-center gap-3">
+            <!-- Кнопка снятия всех галочек -->
+            <button class="btn btn-link text-secondary p-0" id="btnClearCheckboxes" style="font-size: 1.3rem;">
+              <i class="bi bi-x-square"></i>
+            </button>
+            
+            <!-- Кнопка переключения режимов зацикливания -->
+            <button class="btn btn-link text-secondary p-0" id="btnLoopMode" data-i18n-title="loopNone" title="Без зациклювання" style="font-size: 1.5rem;">
+              <i class="bi bi-arrow-right" id="loopIcon"></i>
+            </button>
+          </div>
+
         </div>
       </div>
     </div>

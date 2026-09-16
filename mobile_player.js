@@ -17,12 +17,18 @@ const uiTranslations = {
     apiKeyLabel: "API-ключ DeepSeek:",
     systemPromptLabel: "Системна інструкція:",
     analysisTitle: "Лінгвістичний розбір",
-
+    
     googleErrStruct: "Помилка структури відповіді",
     googleErrParse: "Помилка обробки відповіді",
     googleErrLimit: "Ліміт запитів Google. Зачекайте.",
     googleErrServer: "Помилка сервера: ",
     googleErrNet: "Блокування мережі (Помилка CORS / CGNAT)",
+    
+    // Новые ключи для зацикливания
+    loopNone: "Без зациклювання",
+    loopFile: "Зациклювання файлу",
+    loopPhrase: "Зациклювання фрази",
+    loopSelected: "Зациклювання виділених",
     
     // Названия языков в селекторах
     langEn: "Англійська",
@@ -34,7 +40,7 @@ const uiTranslations = {
     langRu: "Російська",
     langUk: "Українська",
 
-    // Тексты внутри JavaScript (подсказки кнопок, алерты, статусы)
+    // Тексты внутри JavaScript
     btnListen: "Слухати",
     btnTranslate: "Перекласти",
     btnAnalyze: "Розбір",
@@ -69,6 +75,11 @@ const uiTranslations = {
     googleErrLimit: "Лимит запросов Google. Подождите.",
     googleErrServer: "Ошибка сервера: ",
     googleErrNet: "Блокировка сети (Ошибка CORS / CGNAT)",
+    
+    loopNone: "Без зацикливания",
+    loopFile: "Зацикливание файла",
+    loopPhrase: "Зацикливание фразы",
+    loopSelected: "Зацикливание выделенных",
 
     langEn: "Английский",
     langDe: "Немецкий",
@@ -112,6 +123,11 @@ const uiTranslations = {
     googleErrLimit: "Google request limit. Please wait.",
     googleErrServer: "Server error: ",
     googleErrNet: "Network blocked (CORS / CGNAT Error)",
+    
+    loopNone: "No loop",
+    loopFile: "Loop file",
+    loopPhrase: "Loop phrase",
+    loopSelected: "Loop selected",
 
     langEn: "English",
     langDe: "German",
@@ -155,6 +171,11 @@ const uiTranslations = {
     googleErrLimit: "Google-Anfragelimit erreicht. Bitte warten.",
     googleErrServer: "Serverfehler: ",
     googleErrNet: "Netzwerk blockiert (CORS / CGNAT Fehler)",
+    
+    loopNone: "Kein Loop",
+    loopFile: "Datei im Loop",
+    loopPhrase: "Phrase im Loop",
+    loopSelected: "Ausgewählte im Loop",
 
     langEn: "Englisch",
     langDe: "Deutsch",
@@ -198,6 +219,11 @@ const uiTranslations = {
     googleErrLimit: "Límite de solicitudes de Google. Por favor, espere.",
     googleErrServer: "Error del servidor: ",
     googleErrNet: "Red bloqueada (Error CORS / CGNAT)",
+    
+    loopNone: "Sin repetición",
+    loopFile: "Repetir archivo",
+    loopPhrase: "Repetir frase",
+    loopSelected: "Repetir selección",
 
     langEn: "Inglés",
     langDe: "Alemán",
@@ -241,6 +267,11 @@ const uiTranslations = {
     googleErrLimit: "Limite de requêtes Google. Veuillez patienter.",
     googleErrServer: "Erreur du serveur: ",
     googleErrNet: "Réseau bloqué (Erreur CORS / CGNAT)",
+    
+    loopNone: "Sans boucle",
+    loopFile: "Boucler le fichier",
+    loopPhrase: "Boucler la phrase",
+    loopSelected: "Boucler la sélection",
 
     langEn: "Anglais",
     langDe: "Allemand",
@@ -556,19 +587,22 @@ window.addEventListener('load', function() {
     for (let i = 0; i < subtitlesTop.length; i++) {
       const subtitle = subtitlesTop[i];
       const subtitleDiv = document.createElement('div');
-      subtitleDiv.innerHTML = wrapWordsInSpan(subtitle.text);
+      
+      // Добавляем d-flex и gap-3 для размещения чекбокса и текста
+      subtitleDiv.classList.add('subtitle', 'mb-2', 'mb-md-1', 'border-bottom', 'border-secondary', 'border-opacity-25', 'py-3', 'py-md-2', 'mx-auto', 'd-flex', 'align-items-center', 'gap-3');
+      
       subtitleDiv.setAttribute('start', subtitle.startTime);
       subtitleDiv.setAttribute('end', subtitle.endTime);
       subtitleDiv.setAttribute('subNumber', i);
-      /*subtitleDiv.classList.add('subtitle');
-      subtitleDiv.style.marginBottom = '25px';*/ 
-      // subtitleDiv.classList.add('subtitle', 'mb-4', 'mb-md-0');
-      //subtitleDiv.classList.add('subtitle', 'mb-4', 'mb-md-1', 'border-bottom', 'border-secondary', 'border-opacity-25', 'pb-3', 'pb-md-2');
-      subtitleDiv.classList.add('subtitle', 'mb-2', 'mb-md-1', 'border-bottom', 'border-secondary', 'border-opacity-25', 'py-3', 'py-md-2', 'mx-auto');
 
-      // ДОБАВЛЕНО: ограничение ширины для комфортного чтения на ПК
-      // subtitleDiv.style.maxWidth = '900px';
-      // subtitleDiv.style.maxWidth = '80ch';
+      subtitleDiv.innerHTML = `
+        <div class="form-check m-0 flex-shrink-0">
+          <input class="form-check-input phrase-checkbox bg-dark border-secondary" type="checkbox" data-index="${i}" style="transform: scale(1.5); cursor: pointer;">
+        </div>
+        <div class="flex-grow-1 w-100">
+          ${wrapWordsInSpan(subtitle.text)}
+        </div>
+      `;
 
       allTopSubsContainer.appendChild(subtitleDiv);
     }
@@ -688,8 +722,6 @@ window.addEventListener('load', function() {
     if(oldIndex !== currentSubtitleTopIndex) {
       const container = document.getElementById('allTopSubs');
       const cRect = container.getBoundingClientRect();
-      
-      // Определяем направление движения (вперед или назад)
       const isMovingDown = currentSubtitleTopIndex > oldIndex;
 
       const subtitlesElements = document.querySelectorAll('.subtitle');
@@ -699,64 +731,40 @@ window.addEventListener('load', function() {
         if (subNumber === currentSubtitleTopIndex) {
           subtitle.classList.add('subtitleCurrent');
 
-          // --- НОВАЯ ЛОГИКА УМНОГО СКРОЛЛИНГА ---
           const next1 = subtitle.nextElementSibling;
           const next2 = next1 ? next1.nextElementSibling : null;
-          
           const prev1 = subtitle.previousElementSibling;
           const prev2 = prev1 ? prev1.previousElementSibling : null;
 
           if (isMovingDown) {
-            // Движение ВНИЗ: проверяем, видно ли полностью 2 фразы под текущей
             let needsScroll = false;
-            
             if (next2) {
-              const next2Rect = next2.getBoundingClientRect();
-              if (next2Rect.bottom > cRect.bottom) needsScroll = true;
+              if (next2.getBoundingClientRect().bottom > cRect.bottom) needsScroll = true;
             } else if (next1) {
-              const next1Rect = next1.getBoundingClientRect();
-              if (next1Rect.bottom > cRect.bottom) needsScroll = true;
+              if (next1.getBoundingClientRect().bottom > cRect.bottom) needsScroll = true;
             } else {
-              const sRect = subtitle.getBoundingClientRect();
-              if (sRect.bottom > cRect.bottom) needsScroll = true;
+              if (subtitle.getBoundingClientRect().bottom > cRect.bottom) needsScroll = true;
             }
 
-            // Если фразы не помещаются, прокручиваем так, чтобы предыдущая фраза стала первой сверху
-            // (таким образом активная станет второй сверху)
             if (needsScroll) {
-              if (prev1) {
-                prev1.scrollIntoView({ behavior: 'smooth', block: 'start' });
-              } else {
-                subtitle.scrollIntoView({ behavior: 'smooth', block: 'start' });
-              }
+              if (prev1) prev1.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              else subtitle.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
           } else {
-            // Движение ВВЕРХ: проверяем, видно ли полностью 2 фразы над текущей
             let needsScroll = false;
-            
             if (prev2) {
-              const prev2Rect = prev2.getBoundingClientRect();
-              if (prev2Rect.top < cRect.top) needsScroll = true;
+              if (prev2.getBoundingClientRect().top < cRect.top) needsScroll = true;
             } else if (prev1) {
-              const prev1Rect = prev1.getBoundingClientRect();
-              if (prev1Rect.top < cRect.top) needsScroll = true;
+              if (prev1.getBoundingClientRect().top < cRect.top) needsScroll = true;
             } else {
-              const sRect = subtitle.getBoundingClientRect();
-              if (sRect.top < cRect.top) needsScroll = true;
+              if (subtitle.getBoundingClientRect().top < cRect.top) needsScroll = true;
             }
 
-            // Если фразы не помещаются, прокручиваем так, чтобы следующая фраза стала последней снизу
-            // (таким образом активная станет второй снизу)
             if (needsScroll) {
-              if (next1) {
-                next1.scrollIntoView({ behavior: 'smooth', block: 'end' });
-              } else {
-                subtitle.scrollIntoView({ behavior: 'smooth', block: 'end' });
-              }
+              if (next1) next1.scrollIntoView({ behavior: 'smooth', block: 'end' });
+              else subtitle.scrollIntoView({ behavior: 'smooth', block: 'end' });
             }
           }
-          // --- КОНЕЦ ЛОГИКИ СКРОЛЛИНГА ---
-
         } else {
           subtitle.classList.remove('subtitleCurrent');
         }
@@ -771,30 +779,67 @@ window.addEventListener('load', function() {
     }
 
     // =====================================
-    // НОВАЯ ЛОГИКА АВТОПАУЗЫ (Опирается на конец фразы с учетом lrcGap)
+    // ЛОГИКА АВТОПАУЗЫ И ЗАЦИКЛИВАНИЯ
     // =====================================
-    if (stopAfterSubtitleCheckbox && stopAfterSubtitleCheckbox.checked && currentSubtitleTopIndex !== -1) {
+    const safetyBuffer = 0.15; 
+
+    if (loopMode === 3) {
+      // Режим 3: Непрерывное зацикливание всего выделенного диапазона
+      const checkedBoxes = Array.from(document.querySelectorAll('.phrase-checkbox:checked'));
       
-      // Берем точное время окончания текущей фразы
+      if (checkedBoxes.length > 0) {
+        const firstIndex = parseInt(checkedBoxes[0].getAttribute('data-index'));
+        const lastIndex = parseInt(checkedBoxes[checkedBoxes.length - 1].getAttribute('data-index'));
+        
+        const rangeStart = subtitlesTop[firstIndex].startTime;
+        const rangeEnd = subtitlesTop[lastIndex].endTime;
+
+        // Если дошли до конца последней выделенной фразы
+        if (currentTime >= (rangeEnd - safetyBuffer)) {
+          if (pauseWas === 0) {
+            pauseWas = 1;
+            videoPlayer.currentTime = rangeStart;
+            videoPlayer.play();
+          }
+        } else if (currentTime < (rangeEnd - safetyBuffer - 0.1)) {
+          pauseWas = 0;
+        }
+      } else {
+        // Если галочек нет, но включен режим 3 — просто выполняем автопаузу (как в режиме 0)
+        if (currentSubtitleTopIndex !== -1) {
+          const currentEndTime = subtitlesTop[currentSubtitleTopIndex].endTime;
+          if (currentTime >= (currentEndTime - safetyBuffer)) {
+            if (pauseWas === 0) {
+              pauseWas = 1;
+              if (stopAfterSubtitleCheckbox && stopAfterSubtitleCheckbox.checked) videoPlayer.pause();
+            }
+          } else if (currentTime < (currentEndTime - safetyBuffer - 0.1)) {
+            pauseWas = 0;
+          }
+        }
+      }
+    } else if (currentSubtitleTopIndex !== -1) {
+      // Режимы 0, 1, 2: Стандартная пофразная логика
       const currentEndTime = subtitlesTop[currentSubtitleTopIndex].endTime;
       
-      // Буфер безопасности: останавливаем видео за 0.15 секунды до вычисленного конца,
-      // чтобы поглотить лаги timeupdate на мобильных устройствах.
-      const safetyBuffer = 0.15; 
-      
-      // Срабатываем, если пересекли границу
       if (currentTime >= (currentEndTime - safetyBuffer)) {
         if (pauseWas === 0) {
-          videoPlayer.pause();
           pauseWas = 1;
+
+          if (loopMode === 2) {
+            videoPlayer.currentTime = subtitlesTop[currentSubtitleTopIndex].startTime;
+            videoPlayer.play();
+          } else if (loopMode === 0 || loopMode === 1) {
+            if (stopAfterSubtitleCheckbox && stopAfterSubtitleCheckbox.checked) {
+              videoPlayer.pause();
+            }
+          }
         }
-      } 
-      // Сбрасываем флаг только после перехода к следующей фразе
-      else if (currentTime < (currentEndTime - safetyBuffer - 0.1)) {
+      } else if (currentTime < (currentEndTime - safetyBuffer - 0.1)) {
         pauseWas = 0;
       }
     }
-  });
+  }); // <--- ВОТ ЭТУ СТРОКУ НУЖНО ВЕРНУТЬ!
 
   if (audioProgressBar) {
     audioProgressBar.addEventListener('input', (e) => {
@@ -988,22 +1033,79 @@ window.addEventListener('load', function() {
     console.warn("Блокировка случайного выхода назад");
   });
 
+  // ==========================================
+  // 9. ЗАЦИКЛИВАНИЕ И МНОЖЕСТВЕННОЕ ВЫДЕЛЕНИЕ
+  // ==========================================
+  let loopMode = 0; // 0: нет, 1: файл, 2: фраза, 3: выделенные
+  const loopIcons = ['bi-arrow-right', 'bi-repeat', 'bi-repeat-1', 'bi-list-check'];
+  const loopColors = ['text-secondary', 'text-light', 'text-warning', 'text-success'];
+  const loopKeys = ['loopNone', 'loopFile', 'loopPhrase', 'loopSelected'];
 
+  const btnLoopMode = document.getElementById('btnLoopMode');
+  const loopIcon = document.getElementById('loopIcon');
+
+  if (btnLoopMode && loopIcon) {
+    btnLoopMode.addEventListener('click', () => {
+      const lang = localStorage.getItem('interfaceLang') || 'uk';
+      loopIcon.classList.remove(loopIcons[loopMode]);
+      btnLoopMode.classList.remove(loopColors[loopMode]);
+
+      loopMode = (loopMode + 1) % 4;
+
+      loopIcon.classList.add(loopIcons[loopMode]);
+      btnLoopMode.classList.add(loopColors[loopMode]);
+      
+      // Записываем новый ключ для перевода и сразу переводим
+      btnLoopMode.setAttribute('data-i18n-title', loopKeys[loopMode]);
+      btnLoopMode.title = uiTranslations[lang][loopKeys[loopMode]];
+
+      videoPlayer.loop = (loopMode === 1); 
+    });
+  }
+
+  // Логика непрерывного выделения чекбоксов (без Shift)
+  let lastCheckedBoxIndex = null;
+  document.getElementById('allTopSubs').addEventListener('click', (e) => {
+    if (e.target.classList.contains('phrase-checkbox')) {
+      const currentIndex = parseInt(e.target.getAttribute('data-index'));
+
+      if (lastCheckedBoxIndex !== null) {
+        const start = Math.min(lastCheckedBoxIndex, currentIndex);
+        const end = Math.max(lastCheckedBoxIndex, currentIndex);
+        const isChecked = e.target.checked;
+
+        // Применяем состояние последнего клика ко всем чекбоксам в диапазоне
+        for (let i = start; i <= end; i++) {
+          const cb = document.querySelector(`.phrase-checkbox[data-index="${i}"]`);
+          if (cb) cb.checked = isChecked;
+        }
+      }
+      lastCheckedBoxIndex = currentIndex;
+    }
+  });
 
 
   const interfaceLangSelect = document.getElementById('interfaceLang');
 
   // Функция обновления текста
   function applyUiLanguage(lang) {
+    // 1. Обновление обычного текста
     document.querySelectorAll('[data-i18n]').forEach(el => {
       const key = el.getAttribute('data-i18n');
       if (uiTranslations[lang] && uiTranslations[lang][key]) {
-        // Сохраняем иконки, если они есть внутри элемента
         if (el.querySelector('i')) {
           el.innerHTML = el.querySelector('i').outerHTML + ' ' + uiTranslations[lang][key];
         } else {
           el.textContent = uiTranslations[lang][key];
         }
+      }
+    });
+
+    // 2. НОВОЕ: Обновление всплывающих подсказок (title)
+    document.querySelectorAll('[data-i18n-title]').forEach(el => {
+      const key = el.getAttribute('data-i18n-title');
+      if (uiTranslations[lang] && uiTranslations[lang][key]) {
+        el.title = uiTranslations[lang][key];
       }
     });
   }
@@ -1021,10 +1123,78 @@ window.addEventListener('load', function() {
       const selectedLang = e.target.value;
       localStorage.setItem('interfaceLang', selectedLang);
       applyUiLanguage(selectedLang);
+      
+      // ДОБАВЛЕНО: Обновляем подсказку (title) кнопки зацикливания при смене языка
+      if (btnLoopMode) btnLoopMode.title = uiTranslations[selectedLang][loopKeys[loopMode]];
+    });
+  }
+
+  // ==========================================
+  // 10. КНОПКА СНЯТИЯ ВСЕХ ГАЛОЧЕК
+  // ==========================================
+  const btnClearCheckboxes = document.getElementById('btnClearCheckboxes');
+  
+  if (btnClearCheckboxes) {
+    btnClearCheckboxes.addEventListener('click', () => {
+      // Находим все отмеченные чекбоксы и снимаем галочку
+      document.querySelectorAll('.phrase-checkbox:checked').forEach(cb => {
+        cb.checked = false;
+      });
+      
+      // Обязательно сбрасываем индекс последнего клика для корректного выделения нового диапазона
+      lastCheckedBoxIndex = null; 
     });
   }
 
 
+  // ==========================================
+  // 11. УДЕРЖАНИЕ ЭКРАНА ВКЛЮЧЕННЫМ (Wake Lock API)
+  // ==========================================
+  let wakeLock = null;
+
+  // Функция запроса блокировки экрана
+  const requestWakeLock = async () => {
+    try {
+      // Проверяем, поддерживает ли браузер эту функцию
+      if ('wakeLock' in navigator) {
+        wakeLock = await navigator.wakeLock.request('screen');
+        console.log('Wake Lock активирован: экран не погаснет');
+        
+        wakeLock.addEventListener('release', () => {
+          console.log('Wake Lock отключен');
+        });
+      }
+    } catch (err) {
+      console.warn(`Ошибка Wake Lock: ${err.name}, ${err.message}`);
+    }
+  };
+
+  // Функция снятия блокировки (для экономии батареи)
+  const releaseWakeLock = async () => {
+    if (wakeLock !== null) {
+      await wakeLock.release();
+      wakeLock = null;
+    }
+  };
+
+  // Включаем удержание экрана, когда плеер начинает играть
+  videoPlayer.addEventListener('play', () => {
+    requestWakeLock();
+  });
+
+  // Отключаем удержание, когда плеер на паузе
+  videoPlayer.addEventListener('pause', () => {
+    releaseWakeLock();
+  });
+
+  // Важный нюанс: если пользователь свернет браузер и развернет обратно,
+  // система автоматически сбрасывает Wake Lock. Нам нужно его восстановить,
+  // если плеер в этот момент не стоит на паузе.
+  document.addEventListener('visibilitychange', async () => {
+    if (document.visibilityState === 'visible' && !videoPlayer.paused) {
+      await requestWakeLock();
+    }
+  });
 
 
 });
