@@ -498,8 +498,45 @@ window.addEventListener('load', function() {
     return text.replace(/[&<>"']/g, function(m) { return map[m]; });
   }
 
-  // Формирование строки субтитров (с правильными кнопками)[cite: 2]
+  // Формирование строки субтитров (с правильными компактными кнопками)
   function wrapWordsInSpan(sentence) {
+    const lang = localStorage.getItem('interfaceLang') || 'uk';
+    const t = uiTranslations[lang] || uiTranslations.uk;
+
+    const words = sentence.split(" ");
+    const wrappedWords = words.map(word => `<span class="toTranslate">${word}</span>`);
+    const safeSentence = escapeHtml(sentence);
+
+    const playBtn = `<button type="button" class="sub-btn btn-sub-play jumpToSentence" title="${t.btnListen}">
+      <i class="bi bi-play-fill" style="pointer-events: none; font-size: 1.15rem; margin-left: 1px;"></i>
+    </button>`;
+
+    const googleBtn = `<button type="button" class="sub-btn btn-sub-trans googleTranslate" sentence="${safeSentence}" title="${t.btnTranslate}">
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="pointer-events: none;">
+        <path d="M12.87 15.07l-2.54-2.51.03-.03c1.74-1.94 2.98-4.17 3.71-6.53H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z"/>
+      </svg>
+    </button>`;
+
+    const aiBtn = `<button type="button" class="sub-btn btn-sub-ai aiTranslate" sentence="${safeSentence}" title="${t.btnAnalyze}">
+      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 16 16" style="pointer-events: none;">
+        <path d="M7.657 6.247c.11-.33.576-.33.686 0l.203.61a2.46 2.46 0 0 0 1.585 1.585l.61.203c.33.11.33.576 0 .686l-.61.203a2.46 2.46 0 0 0-1.585 1.585l-.203.61c-.11.33-.576.33-.686 0l-.203-.61a2.46 2.46 0 0 0-1.585-1.585l-.61-.203c-.33-.11-.33-.576 0-.686l.61-.203a2.46 2.46 0 0 0 1.585-1.585l.203-.61zM11.457 4.144c.05-.152.261-.152.311 0l.11.33a1.13 1.13 0 0 0 .727.727l.33.11c.152.05.152.261 0 .311l-.33.11a1.13 1.13 0 0 0-.727.727l-.11.33c-.05.152-.261.152-.311 0l-.11-.33a1.13 1.13 0 0 0-.727-.727l-.33-.11c-.152-.05-.152-.261 0-.311l.33-.11a1.13 1.13 0 0 0 .727-.727l.11-.33z"/>
+      </svg>
+    </button>`;
+
+    return `
+      <div class="d-flex justify-content-between align-items-start w-100 gap-2">
+        <div class="text-start flex-grow-1" style="word-break: break-word;">
+          ${wrappedWords.join(" ")}
+        </div>
+        <div class="d-flex align-items-center gap-1 flex-shrink-0 pt-0">
+          ${playBtn}
+          ${googleBtn}
+          ${aiBtn}
+        </div>
+      </div>
+    `;
+  }
+  /*function wrapWordsInSpan(sentence) {
     // Получаем текущий язык для перевода подсказок
     const lang = localStorage.getItem('interfaceLang') || 'uk';
     const t = uiTranslations[lang];
@@ -539,48 +576,7 @@ window.addEventListener('load', function() {
         </div>
       </div>
     `;
-
-    /*return `
-      <div class="d-flex flex-column flex-md-row justify-content-between align-items-center align-items-md-center w-100 mb-4 mb-md-1 gap-2 gap-md-3">
-        <!-- Фраза: по центру на мобильных, слева на ПК -->
-        <div class="text-center text-md-start flex-grow-1" style="line-height: 1.5;">
-          ${wrappedWords.join(" ")}
-        </div>
-        
-        <!-- Кнопки: под фразой на мобильных, справа в ряд на ПК -->
-        <div class="d-flex justify-content-center flex-wrap gap-2 flex-shrink-0">
-          ${playBtn} 
-          ${googleBtn} 
-          ${aiBtn}
-        </div>
-      </div>
-    `;*/
-
-    /*return `
-      <div class="d-flex flex-column flex-md-row justify-content-between align-items-center align-items-md-start w-100 mb-3 gap-3">
-        <!-- Фраза: по центру на мобильных, слева на ПК -->
-        <div class="text-center text-md-start flex-grow-1" style="line-height: 1.8;">
-          ${wrappedWords.join(" ")}
-        </div>
-        
-        <!-- Кнопки: под фразой на мобильных, справа в ряд на ПК -->
-        <div class="d-flex justify-content-center flex-wrap gap-2 flex-shrink-0">
-          ${playBtn} 
-          ${googleBtn} 
-          ${aiBtn}
-        </div>
-      </div>
-    `;*/
-
-    /*return `
-      <div class="mb-3">${wrappedWords.join(" ")}</div>
-      <div class="d-flex justify-content-center flex-wrap gap-2 mt-2">
-        ${playBtn} 
-        ${googleBtn} 
-        ${aiBtn}
-      </div>
-    `;*/  
-  }
+  }*/
 
   function loadTopSubtitles() {
     allTopSubsContainer.innerHTML = '';
@@ -588,18 +584,19 @@ window.addEventListener('load', function() {
       const subtitle = subtitlesTop[i];
       const subtitleDiv = document.createElement('div');
       
-      // Добавляем d-flex и gap-3 для размещения чекбокса и текста
-      subtitleDiv.classList.add('subtitle', 'mb-2', 'mb-md-1', 'border-bottom', 'border-secondary', 'border-opacity-25', 'py-3', 'py-md-2', 'mx-auto', 'd-flex', 'align-items-center', 'gap-3');
+      // align-items-start держит элементы у первой строки
+      subtitleDiv.classList.add('subtitle', 'border-bottom', 'border-secondary', 'border-opacity-25', 'py-2', 'd-flex', 'align-items-start', 'gap-2');
       
       subtitleDiv.setAttribute('start', subtitle.startTime);
       subtitleDiv.setAttribute('end', subtitle.endTime);
       subtitleDiv.setAttribute('subNumber', i);
 
+      // Убран класс 'form-check', создававший паразитный отступ слева в 1.5em
       subtitleDiv.innerHTML = `
-        <div class="form-check m-0 flex-shrink-0">
-          <input class="form-check-input phrase-checkbox bg-dark border-secondary" type="checkbox" data-index="${i}" style="transform: scale(1.5); cursor: pointer;">
+        <div class="flex-shrink-0 d-flex align-items-center pt-1">
+          <input class="form-check-input phrase-checkbox bg-dark border-secondary m-0" type="checkbox" data-index="${i}">
         </div>
-        <div class="flex-grow-1 w-100">
+        <div class="flex-grow-1 w-100" style="min-width: 0;">
           ${wrapWordsInSpan(subtitle.text)}
         </div>
       `;
