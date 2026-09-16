@@ -48,7 +48,11 @@ const uiTranslations = {
     dsAnalyzing: "DeepSeek аналізує...",
     enterApiKey: "Введіть API ключ DeepSeek у налаштуваннях.",
     errorResponse: "Помилка відповіді:",
-    errorNetwork: "Мережева помилка:"
+    errorNetwork: "Мережева помилка:",
+
+    systemDataTitle: "Скидання даних",
+    resetSettingsBtn: "Скинути всі налаштування",
+    confirmReset: "Ви впевнені, що хочете видалити всі збережені налаштування та кеш? Додаток буде перезавантажено."
   },
   
   ru: {
@@ -96,7 +100,11 @@ const uiTranslations = {
     dsAnalyzing: "DeepSeek анализирует...",
     enterApiKey: "Введите API ключ DeepSeek в настройках.",
     errorResponse: "Ошибка ответа:",
-    errorNetwork: "Сетевая ошибка:"
+    errorNetwork: "Сетевая ошибка:",
+
+    systemDataTitle: "Сброс данных",
+    resetSettingsBtn: "Сбросить все настройки",
+    confirmReset: "Вы уверены, что хотите удалить все сохраненные настройки и кэш? Приложение будет перезагружено."
   },
   
   en: {
@@ -144,7 +152,11 @@ const uiTranslations = {
     dsAnalyzing: "DeepSeek is analyzing...",
     enterApiKey: "Enter DeepSeek API key in settings.",
     errorResponse: "Response Error:",
-    errorNetwork: "Network Error:"
+    errorNetwork: "Network Error:",
+
+    systemDataTitle: "Reset data",
+    resetSettingsBtn: "Reset all settings",
+    confirmReset: "Are you sure you want to clear all saved settings and cache? The app will reload."
   },
 
   de: {
@@ -192,7 +204,11 @@ const uiTranslations = {
     dsAnalyzing: "DeepSeek analysiert...",
     enterApiKey: "Geben Sie den DeepSeek-API-Schlüssel in den Einstellungen ein.",
     errorResponse: "Antwortfehler:",
-    errorNetwork: "Netzwerkfehler:"
+    errorNetwork: "Netzwerkfehler:",
+
+    systemDataTitle: "Daten zurücksetzen",
+    resetSettingsBtn: "Alle Einstellungen zurücksetzen",
+    confirmReset: "Sind Sie sicher, dass Sie alle gespeicherten Einstellungen und den Cache löschen möchten? Die App wird neu geladen."
   },
 
   es: {
@@ -240,7 +256,11 @@ const uiTranslations = {
     dsAnalyzing: "DeepSeek está analizando...",
     enterApiKey: "Introduzca la clave API de DeepSeek en configuración.",
     errorResponse: "Error de respuesta:",
-    errorNetwork: "Error de red:"
+    errorNetwork: "Error de red:",
+
+    systemDataTitle: "Restablecer datos",
+    resetSettingsBtn: "Restablecer todos los ajustes",
+    confirmReset: "¿Está seguro de que desea borrar todas las configuraciones guardadas y el caché? La aplicación se recargará."
   },
 
   fr: {
@@ -288,7 +308,11 @@ const uiTranslations = {
     dsAnalyzing: "DeepSeek analyse...",
     enterApiKey: "Entrez la clé API DeepSeek dans les paramètres.",
     errorResponse: "Erreur de réponse:",
-    errorNetwork: "Erreur réseau:"
+    errorNetwork: "Erreur réseau:",
+
+    systemDataTitle: "Réinitialiser les données",
+    resetSettingsBtn: "Réinitialiser tous les paramètres",
+    confirmReset: "Êtes-vous sûr de vouloir effacer tous les paramètres enregistrés et le cache ? L'application va redémarrer."
   }
 };
 
@@ -303,22 +327,30 @@ window.addEventListener('load', function() {
   const stopAfterSubtitleCheckbox = document.getElementById('stopAfterSubtitle');
   const speakOnTapCheckbox = document.getElementById('speakOnTap');
 
-  const defaultInstruction = `Ты строгий лингвистический анализатор. ЗАПРЕЩЕНО использовать любые приветствия, вводные, оценочные или заключительные фразы. Начинай ответ СТРОГО с литературного перевода.
+  const defaultInstruction = `Ты — строгий лингвистический анализатор. 
 
-Раздели предложение на короткие логические смысловые блоки (словосочетания, идиомы, грамматические конструкции, предложные группы или отдельные сложные слова). Не дроби неделимые фразы.
+**ПРАВИЛА:**
+1. ЗАПРЕЩЕНО использовать любые приветствия, вводные, оценочные или заключительные фразы.
+2. Раздели предложение на логические смысловые блоки (словосочетания, идиомы, грамматические конструкции). Не дроби неделимые фразы.
+3. Каждое слово внутри смыслового блока должно выводиться строго в виде отдельного пункта маркированного списка (с символом *).
+4. Исходные фразы и отдельные слова ОБЯЗАТЕЛЬНО выделяй жирным шрифтом (в обоймице двойных звездочек \`**\`).
+5. Не дублируй перевод слов в описании грамматики.
 
-Выводи ответ строго по этой структуре:
+**ШАБЛОН ОТВЕТА (СОБЛЮДАТЬ СТРОГО):**
 
 **Литературный перевод:**
-[Полный перевод фразы]
+[Полный перевод предложения]
 
-**Разбор:**
+**[Оригинальный смысловой блок]** — [Его точное значение именно в этом предложении]
 
-**[Смысловой блок]** — [его точное значение именно в этом предложении]
-* [Краткое грамматическое пояснение: только самое важное для понимания (начальная форма, падеж, время, управление, тип склонения), краткий перевод каждого слова в контексте 
-**[слово]** - (перевод). Без избыточных деталей, каждое слово с новой строки, но без абзаца или пункта]
-***
-Продолжай этот шаблон для каждого смыслового блока в предложении.`;
+* **[оригинальное слово 1]** — [краткий перевод слова в контексте]
+* **[оригинальное слово 2]** — [краткий перевод слова в контексте]
+* **[оригинальное слово N]** — [краткий перевод слова в контексте]
+
+**Грамматика:** [Краткое пояснение всего блока: только самое важное (устойчивые выражения если они есть, начальная форма, время, падеж, управление). Без пословного перевода здесь!]
+---
+
+(Повторяй этот шаблон для каждого следующего смыслового блока, разделяя их горизонтальной линией \`---\`)`;
 
   // Загрузка настроек[cite: 1]
   if (deepseekApiKeyInput) deepseekApiKeyInput.value = localStorage.getItem('deepseekApiKey') || '';
@@ -536,47 +568,6 @@ window.addEventListener('load', function() {
       </div>
     `;
   }
-  /*function wrapWordsInSpan(sentence) {
-    // Получаем текущий язык для перевода подсказок
-    const lang = localStorage.getItem('interfaceLang') || 'uk';
-    const t = uiTranslations[lang];
-
-    const words = sentence.split(" ");
-    const wrappedWords = words.map(word => `<span class="toTranslate">${word}</span>`);
-    const safeSentence = escapeHtml(sentence);
-
-    const playBtn = `<button type="button" class="btn btn-outline-warning btn-sm rounded-pill px-4 jumpToSentence" title="${t.btnListen}">
-      <i class="bi bi-play-fill" style="pointer-events: none; font-size: 1.2rem; line-height: 1;"></i>
-    </button>`;
-
-    const googleBtn = `<button type="button" class="btn btn-outline-light btn-sm rounded-pill px-4 googleTranslate" sentence="${safeSentence}" title="${t.btnTranslate}">
-      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="pointer-events: none; vertical-align: text-bottom;">
-        <path d="M12.87 15.07l-2.54-2.51.03-.03c1.74-1.94 2.98-4.17 3.71-6.53H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z"/>
-      </svg>
-    </button>`;
-
-    const aiBtn = `<button type="button" class="btn btn-outline-info btn-sm rounded-pill px-4 aiTranslate" sentence="${safeSentence}" title="${t.btnAnalyze}">
-      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16" style="pointer-events: none; vertical-align: text-bottom;">
-        <path d="M7.657 6.247c.11-.33.576-.33.686 0l.203.61a2.46 2.46 0 0 0 1.585 1.585l.61.203c.33.11.33.576 0 .686l-.61.203a2.46 2.46 0 0 0-1.585 1.585l-.203.61c-.11.33-.576.33-.686 0l-.203-.61a2.46 2.46 0 0 0-1.585-1.585l-.61-.203c-.33-.11-.33-.576 0-.686l.61-.203a2.46 2.46 0 0 0 1.585-1.585l.203-.61zM11.457 4.144c.05-.152.261-.152.311 0l.11.33a1.13 1.13 0 0 0 .727.727l.33.11c.152.05.152.261 0 .311l-.33.11a1.13 1.13 0 0 0-.727.727l-.11.33c-.05.152-.261.152-.311 0l-.11-.33a1.13 1.13 0 0 0-.727-.727l-.33-.11c-.152-.05-.152-.261 0-.311l.33-.11a1.13 1.13 0 0 0 .727-.727l.11-.33z"/>
-      </svg>
-    </button>`;
-
-    return `
-      <div class="d-flex flex-column flex-md-row justify-content-between align-items-center w-100 gap-2 gap-md-3">
-        <!-- Фраза: по центру на мобильных, слева на ПК -->
-        <div class="text-center text-md-start flex-grow-1" style="line-height: 1.5;">
-          ${wrappedWords.join(" ")}
-        </div>
-        
-        <!-- Кнопки: справа в ряд и строго по центру по вертикали -->
-        <div class="d-flex justify-content-center align-items-center flex-wrap gap-2 flex-shrink-0">
-          ${playBtn} 
-          ${googleBtn} 
-          ${aiBtn}
-        </div>
-      </div>
-    `;
-  }*/
 
   function loadTopSubtitles() {
     allTopSubsContainer.innerHTML = '';
@@ -1060,24 +1051,48 @@ window.addEventListener('load', function() {
     });
   }
 
-  // Логика непрерывного выделения чекбоксов (без Shift)
-  let lastCheckedBoxIndex = null;
+  // Логика сплошного выделения чекбоксов (БЕЗ якорей и памяти предыдущего клика)
   document.getElementById('allTopSubs').addEventListener('click', (e) => {
     if (e.target.classList.contains('phrase-checkbox')) {
       const currentIndex = parseInt(e.target.getAttribute('data-index'));
+      const isChecked = e.target.checked;
 
-      if (lastCheckedBoxIndex !== null) {
-        const start = Math.min(lastCheckedBoxIndex, currentIndex);
-        const end = Math.max(lastCheckedBoxIndex, currentIndex);
-        const isChecked = e.target.checked;
+      // Получаем индексы всех активных галочек (уже с учетом текущего клика)
+      const allChecked = Array.from(document.querySelectorAll('.phrase-checkbox:checked'))
+                              .map(cb => parseInt(cb.getAttribute('data-index')));
 
-        // Применяем состояние последнего клика ко всем чекбоксам в диапазоне
-        for (let i = start; i <= end; i++) {
-          const cb = document.querySelector(`.phrase-checkbox[data-index="${i}"]`);
-          if (cb) cb.checked = isChecked;
+      if (isChecked) {
+        // --- ЕСЛИ СТАВИМ ГАЛОЧКУ ---
+        if (allChecked.length > 1) {
+          // Находим самую верхнюю и самую нижнюю галочку из всех активных
+          const minIdx = Math.min(...allChecked);
+          const maxIdx = Math.max(...allChecked);
+          
+          // Заполняем всё между ними, создавая 100% монолитный сплошной блок
+          for (let i = minIdx; i <= maxIdx; i++) {
+            const cb = document.querySelector(`.phrase-checkbox[data-index="${i}"]`);
+            if (cb) cb.checked = true;
+          }
+        }
+      } else {
+        // --- ЕСЛИ СНИМАЕМ ГАЛОЧКУ ---
+        if (allChecked.length > 0) {
+          const minIdx = Math.min(...allChecked);
+          
+          // Если снимаем любую галочку КРОМЕ самой верхней активной
+          if (currentIndex > minIdx) {
+            // Снимаем её саму и ВСЕ галочки, которые идут ниже неё (отрезаем низ)
+            document.querySelectorAll('.phrase-checkbox').forEach(cb => {
+              const idx = parseInt(cb.getAttribute('data-index'));
+              if (idx >= currentIndex) {
+                cb.checked = false;
+              }
+            });
+          }
+          // Если снимаем самую верхнюю (currentIndex < minIdx) — она просто 
+          // снимается сама, укорачивая блок сверху. Никакого доп. кода не нужно!
         }
       }
-      lastCheckedBoxIndex = currentIndex;
     }
   });
 
@@ -1137,9 +1152,6 @@ window.addEventListener('load', function() {
       document.querySelectorAll('.phrase-checkbox:checked').forEach(cb => {
         cb.checked = false;
       });
-      
-      // Обязательно сбрасываем индекс последнего клика для корректного выделения нового диапазона
-      lastCheckedBoxIndex = null; 
     });
   }
 
@@ -1192,6 +1204,26 @@ window.addEventListener('load', function() {
       await requestWakeLock();
     }
   });
+
+  // ==========================================
+  // СБРОС ВСЕХ НАСТРОЕК
+  // ==========================================
+  const btnResetSettings = document.getElementById('btnResetSettings');
+  
+  if (btnResetSettings) {
+    btnResetSettings.addEventListener('click', () => {
+      const lang = localStorage.getItem('interfaceLang') || 'uk';
+      const t = uiTranslations[lang];
+      
+      // Запрашиваем подтверждение перед удалением
+      if (confirm(t.confirmReset || "Вы уверены, что хотите удалить все настройки?")) {
+        // Очищаем всё локальное хранилище
+        localStorage.clear();
+        // Перезагружаем страницу, чтобы применить настройки по умолчанию
+        location.reload();
+      }
+    });
+  }
 
 
 });
