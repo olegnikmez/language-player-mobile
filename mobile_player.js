@@ -780,10 +780,20 @@ window.addEventListener('load', function() {
         const lastIndex = parseInt(checkedBoxes[checkedBoxes.length - 1].getAttribute('data-index'));
         
         const rangeStart = subtitlesTop[firstIndex].startTime;
-        const rangeEnd = subtitlesTop[lastIndex].endTime;
+        let rangeEnd = subtitlesTop[lastIndex].endTime;
 
+        if (videoPlayer.duration && rangeEnd >= videoPlayer.duration) {
+          rangeEnd = videoPlayer.duration;
+        }
+
+        // --- НОВОЕ ИСПРАВЛЕНИЕ: Защита от воспроизведения ДО начала диапазона ---
+        if (currentTime < (rangeStart - 0.1)) {
+          videoPlayer.currentTime = rangeStart;
+          videoPlayer.play();
+          pauseWas = 0; // Сбрасываем триггер паузы
+        } 
         // Если дошли до конца последней выделенной фразы
-        if (currentTime >= (rangeEnd - safetyBuffer)) {
+        else if (currentTime >= (rangeEnd - safetyBuffer)) {
           if (pauseWas === 0) {
             pauseWas = 1;
             videoPlayer.currentTime = rangeStart;
@@ -795,7 +805,9 @@ window.addEventListener('load', function() {
       } else {
         // Если галочек нет, но включен режим 3 — просто выполняем автопаузу (как в режиме 0)
         if (currentSubtitleTopIndex !== -1) {
-          const currentEndTime = subtitlesTop[currentSubtitleTopIndex].endTime;
+          let currentEndTime = subtitlesTop[currentSubtitleTopIndex].endTime;
+          if (videoPlayer.duration && currentEndTime >= videoPlayer.duration) currentEndTime = videoPlayer.duration;
+
           if (currentTime >= (currentEndTime - safetyBuffer)) {
             if (pauseWas === 0) {
               pauseWas = 1;
@@ -808,7 +820,12 @@ window.addEventListener('load', function() {
       }
     } else if (currentSubtitleTopIndex !== -1) {
       // Режимы 0, 1, 2: Стандартная пофразная логика
-      const currentEndTime = subtitlesTop[currentSubtitleTopIndex].endTime;
+      let currentEndTime = subtitlesTop[currentSubtitleTopIndex].endTime;
+      
+      // ИСПРАВЛЕНИЕ 2: Защита для последней фразы файла в обычных режимах
+      if (videoPlayer.duration && currentEndTime >= videoPlayer.duration) {
+        currentEndTime = videoPlayer.duration;
+      }
       
       if (currentTime >= (currentEndTime - safetyBuffer)) {
         if (pauseWas === 0) {
@@ -827,7 +844,22 @@ window.addEventListener('load', function() {
         pauseWas = 0;
       }
     }
-  }); // <--- ВОТ ЭТУ СТРОКУ НУЖНО ВЕРНУТЬ!
+  }); 
+
+  // ИСПРАВЛЕНИЕ 3 (АБСОЛЮТНАЯ СТРАХОВКА): Обработка нативного конца файла
+  videoPlayer.addEventListener('ended', () => {
+    if (loopMode === 2 && currentSubtitleTopIndex !== -1) {
+      videoPlayer.currentTime = subtitlesTop[currentSubtitleTopIndex].startTime;
+      videoPlayer.play();
+    } else if (loopMode === 3) {
+      const checkedBoxes = Array.from(document.querySelectorAll('.phrase-checkbox:checked'));
+      if (checkedBoxes.length > 0) {
+        const firstIndex = parseInt(checkedBoxes[0].getAttribute('data-index'));
+        videoPlayer.currentTime = subtitlesTop[firstIndex].startTime;
+        videoPlayer.play();
+      }
+    }
+  });
 
   if (audioProgressBar) {
     audioProgressBar.addEventListener('input', (e) => {
