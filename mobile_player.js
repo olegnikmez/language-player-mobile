@@ -322,6 +322,7 @@ window.addEventListener('load', function() {
   // ==========================================
   const deepseekApiKeyInput = document.getElementById('deepseekApiKey');
   const deepseekInstructionInput = document.getElementById('deepseekInstruction');
+  let currentDeepSeekContext = [];
   const selectSl = document.getElementById('sl');
   const selectTl = document.getElementById('tl');
   const stopAfterSubtitleCheckbox = document.getElementById('stopAfterSubtitle');
@@ -984,6 +985,18 @@ window.addEventListener('load', function() {
 
       if (!apiKey) { alert(t.enterApiKey); return; } // <--- ДИНАМИЧЕСКИЙ ТЕКСТ
 
+      // 1. ИНИЦИАЛИЗИРУЕМ ИСТОРИЮ (ГЛОБАЛЬНАЯ ПЕРЕМЕННАЯ ДЛЯ ОКНА)
+      window.currentDeepSeekContext = [
+        { role: 'system', content: instruction },
+        { role: 'user', content: sentence }
+      ];
+
+      // 2. Прячем поле ввода на время первичного анализа
+      const followUpInput = document.getElementById('aiFollowUpInput');
+      const followUpBtn = document.getElementById('btnSendFollowUp');
+      if (followUpInput) followUpInput.style.display = 'none';
+      if (followUpBtn) followUpBtn.style.display = 'none';
+
       aiOffcanvas.show();
       aiOffcanvasBody.innerHTML = `<div class="text-center mt-5"><div class="spinner-border text-primary" role="status"></div><p class="mt-3 text-light fw-bold">${t.dsAnalyzing}</p></div>`; // <--- ДИНАМИЧЕСКИЙ ТЕКСТ
 
@@ -996,10 +1009,7 @@ window.addEventListener('load', function() {
           },
           body: JSON.stringify({
             model: 'deepseek-chat',
-            messages: [
-              { role: 'system', content: instruction },
-              { role: 'user', content: sentence }
-            ],
+            messages: window.currentDeepSeekContext, // <--- ИСПОЛЬЗУЕМ ИСТОРИЮ
             temperature: 0.3
           })
         });
@@ -1007,16 +1017,116 @@ window.addEventListener('load', function() {
         const data = await response.json();
         if (data.choices && data.choices[0]) {
           const answer = data.choices[0].message.content;
+          
+          // 3. ДОБАВЛЯЕМ ОТВЕТ В ИСТОРИЮ
+          window.currentDeepSeekContext.push({ role: 'assistant', content: answer });
+
           const htmlAnswer = (typeof marked !== 'undefined') ? marked.parse(answer) : answer.replace(/\n/g, '<br>');
           
           aiOffcanvasBody.innerHTML = `
             <div class="text-info fw-bold mb-3 border-bottom border-secondary pb-2" style="font-size: 1.2rem;">${escapeHtml(sentence)}</div>
             <div class="markdown-body text-light" style="font-size: 1rem; line-height: 1.5;">${htmlAnswer}</div>
           `;
+
+          // 4. ПОКАЗЫВАЕМ ПОЛЕ ВВОДА ДЛЯ ДОП. ВОПРОСОВ
+          if (followUpInput) followUpInput.style.display = 'block';
+          if (followUpBtn) followUpBtn.style.display = 'block';
+
         } else { aiOffcanvasBody.innerHTML = `<div class="alert alert-danger">${t.errorResponse} ${JSON.stringify(data)}</div>`; } // <--- ДИНАМИЧЕСКИЙ ТЕКСТ
       } catch (error) { aiOffcanvasBody.innerHTML = `<div class="alert alert-danger">${t.errorNetwork} ${error.message}</div>`; } // <--- ДИНАМИЧЕСКИЙ ТЕКСТ
     }
   });
+
+  // ==========================================
+  // ДОПОЛНИТЕЛЬНЫЕ ВОПРОСЫ DEEPSEEK В ШТОРКЕ (ЧАТ)
+  // ==========================================
+  const btnSendFollowUp = document.getElementById('btnSendFollowUp');
+  const aiFollowUpInput = document.getElementById('aiFollowUpInput');
+
+  if (btnSendFollowUp && aiFollowUpInput) {
+    // Отправка по кнопке
+    btnSendFollowUp.addEventListener('click', sendFollowUpMessage);
+    
+    // Отправка по клавише Enter
+    aiFollowUpInput.addEventListener('keypress', function (e) {
+      if (e.key === 'Enter') sendFollowUpMessage();
+    });
+
+    async function sendFollowUpMessage() {
+      const question = aiFollowUpInput.value.trim();
+      if (!question || !window.currentDeepSeekContext) return;
+
+      const apiKey = document.getElementById('deepseekApiKey') ? document.getElementById('deepseekApiKey').value.trim() : localStorage.getItem('deepseekApiKey');
+      const lang = localStorage.getItem('interfaceLang') || 'uk';
+      const t = uiTranslations[lang];
+
+      // Добавляем вопрос в историю
+      window.currentDeepSeekContext.push({ role: 'user', content: question });
+      
+      // Очищаем инпут и выводим сообщение пользователя в интерфейс
+      aiFollowUpInput.value = '';
+      aiOffcanvasBody.innerHTML += `
+        <div class="mt-4 mb-2 text-end">
+          <span class="bg-primary text-light px-3 py-2 rounded-3 d-inline-block text-start">${escapeHtml(question)}</span>
+        </div>
+        <div id="aiTypingIndicator" class="text-start mb-2">
+          <div class="spinner-grow spinner-grow-sm text-secondary" role="status"></div>
+        </div>
+      `;
+      
+      // Прокручиваем шторку в самый низ
+      // Прокручиваем шторку в самый низ
+      aiOffcanvasBody.scrollTop = aiOffcanvasBody.scrollHeight;
+
+      // НОВОЕ: Обход жесткого системного шаблона для доп. вопросов
+      // Создаем поверхностную копию истории, чтобы не портить оригинальный массив
+      const messagesForAPI = [...window.currentDeepSeekContext];
+      
+      // Подменяем последнее сообщение пользователя (вопрос) на версию с командой-отменой
+      messagesForAPI[messagesForAPI.length - 1] = {
+        role: 'user',
+        content: `Ответь на следующий вопрос в свободной диалоговой форме. Игнорируй строгий шаблон разбора из системного сообщения (не выводи "Литературный перевод", "Грамматика" и списки слов).\n\nВопрос: ${question}`
+      };
+
+      try {
+        const response = await fetch('https://api.deepseek.com/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`
+          },
+          body: JSON.stringify({
+            model: 'deepseek-chat',
+            messages: messagesForAPI, // <--- Отправляем модифицированный массив
+            temperature: 0.5 
+          })
+        });
+
+        const data = await response.json();
+        
+        // Убираем индикатор загрузки
+        const typingIndicator = document.getElementById('aiTypingIndicator');
+        if (typingIndicator) typingIndicator.remove();
+
+        if (data.choices && data.choices[0]) {
+          const answer = data.choices[0].message.content;
+          
+          // Сохраняем ответ ИИ в историю, чтобы можно было продолжать диалог
+          window.currentDeepSeekContext.push({ role: 'assistant', content: answer });
+          
+          const htmlAnswer = (typeof marked !== 'undefined') ? marked.parse(answer) : answer.replace(/\n/g, '<br>');
+          aiOffcanvasBody.innerHTML += `<div class="markdown-body text-light bg-secondary bg-opacity-10 p-3 rounded-3 mt-2" style="font-size: 1rem; line-height: 1.5;">${htmlAnswer}</div>`;
+          aiOffcanvasBody.scrollTop = aiOffcanvasBody.scrollHeight;
+        } else {
+          aiOffcanvasBody.innerHTML += `<div class="alert alert-danger mt-2 text-start">${t.errorResponse} ${JSON.stringify(data)}</div>`;
+        }
+      } catch (error) {
+        const typingIndicator = document.getElementById('aiTypingIndicator');
+        if (typingIndicator) typingIndicator.remove();
+        aiOffcanvasBody.innerHTML += `<div class="alert alert-danger mt-2 text-start">${t.errorNetwork} ${error.message}</div>`;
+      }
+    }
+  }
 
   // ==========================================
   // 8. ГЛОБАЛЬНЫЕ ГОРЯЧИЕ КЛАВИШИ ДЛЯ ПК
