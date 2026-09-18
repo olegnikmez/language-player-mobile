@@ -336,6 +336,7 @@ window.addEventListener('load', function() {
 3. Каждое слово внутри смыслового блока должно выводиться строго в виде отдельного пункта маркированного списка (с символом *).
 4. Исходные фразы и отдельные слова ОБЯЗАТЕЛЬНО выделяй жирным шрифтом (в обоймице двойных звездочек \`**\`).
 5. Не дублируй перевод слов в описании грамматики.
+6. Если передан блок "Контекст сцены", используй его ИСКЛЮЧИТЕЛЬНО для точного понимания смысла (определения времени, рода, местоимений). Литературный перевод и разбор делай СТРОГО для "Целевой фразы для разбора".
 
 **ШАБЛОН ОТВЕТА (СОБЛЮДАТЬ СТРОГО):**
 
@@ -980,6 +981,40 @@ window.addEventListener('load', function() {
     const aiBtn = event.target.closest('.aiTranslate');
     if (aiBtn && aiOffcanvas) {
       const sentence = aiBtn.getAttribute('sentence');
+      
+      // --- НОВЫЙ БЛОК: СБОР КОНТЕКСТА ---
+      let prevSentence = "";
+      let nextSentence = "";
+      const subtitleDiv = aiBtn.closest('.subtitle');
+      
+      if (subtitleDiv) {
+        // Ищем предыдущую фразу
+        const prevDiv = subtitleDiv.previousElementSibling;
+        if (prevDiv && prevDiv.classList.contains('subtitle')) {
+          const prevAiBtn = prevDiv.querySelector('.aiTranslate');
+          if (prevAiBtn) prevSentence = prevAiBtn.getAttribute('sentence');
+        }
+        
+        // Ищем следующую фразу
+        const nextDiv = subtitleDiv.nextElementSibling;
+        if (nextDiv && nextDiv.classList.contains('subtitle')) {
+          const nextAiBtn = nextDiv.querySelector('.aiTranslate');
+          if (nextAiBtn) nextSentence = nextAiBtn.getAttribute('sentence');
+        }
+      }
+
+      // Формируем итоговый промпт с контекстом
+      let contextualizedPrompt = "";
+      if (prevSentence || nextSentence) {
+        contextualizedPrompt = "Контекст сцены:\n";
+        if (prevSentence) contextualizedPrompt += `[Предыдущая фраза]: ${prevSentence}\n`;
+        if (nextSentence) contextualizedPrompt += `[Следующая фраза]: ${nextSentence}\n`;
+        contextualizedPrompt += `\nЦелевая фраза для разбора:\n${sentence}`;
+      } else {
+        contextualizedPrompt = sentence; // Если фраза одна, отправляем как есть
+      }
+      // ----------------------------------
+
       const apiKey = deepseekApiKeyInput ? deepseekApiKeyInput.value.trim() : localStorage.getItem('deepseekApiKey');
       const instruction = deepseekInstructionInput ? deepseekInstructionInput.value.trim() : defaultInstruction;
 
@@ -988,7 +1023,7 @@ window.addEventListener('load', function() {
       // 1. ИНИЦИАЛИЗИРУЕМ ИСТОРИЮ (ГЛОБАЛЬНАЯ ПЕРЕМЕННАЯ ДЛЯ ОКНА)
       window.currentDeepSeekContext = [
         { role: 'system', content: instruction },
-        { role: 'user', content: sentence }
+        { role: 'user', content: contextualizedPrompt } // <--- ОТПРАВЛЯЕМ ФРАЗУ ВМЕСТЕ С КОНТЕКСТОМ
       ];
 
       // 2. Прячем поле ввода на время первичного анализа
