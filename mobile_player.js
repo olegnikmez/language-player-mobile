@@ -983,31 +983,40 @@ window.addEventListener('load', function() {
       const sentence = aiBtn.getAttribute('sentence');
       
       // --- НОВЫЙ БЛОК: СБОР КОНТЕКСТА ---
-      let prevSentence = "";
-      let nextSentence = "";
+      let prevSentence2 = ""; // Пред-предыдущая
+      let prevSentence1 = ""; // Предыдущая
+      let nextSentence = "";  // Следующая
       const subtitleDiv = aiBtn.closest('.subtitle');
       
       if (subtitleDiv) {
-        // Ищем предыдущую фразу
-        const prevDiv = subtitleDiv.previousElementSibling;
-        if (prevDiv && prevDiv.classList.contains('subtitle')) {
-          const prevAiBtn = prevDiv.querySelector('.aiTranslate');
-          if (prevAiBtn) prevSentence = prevAiBtn.getAttribute('sentence');
+        // Ищем предыдущую фразу (1 шаг назад)
+        const prev1 = subtitleDiv.previousElementSibling;
+        if (prev1 && prev1.classList.contains('subtitle')) {
+          const btn1 = prev1.querySelector('.aiTranslate');
+          if (btn1) prevSentence1 = btn1.getAttribute('sentence');
+          
+          // Ищем пред-предыдущую фразу (2 шага назад)
+          const prev2 = prev1.previousElementSibling;
+          if (prev2 && prev2.classList.contains('subtitle')) {
+            const btn2 = prev2.querySelector('.aiTranslate');
+            if (btn2) prevSentence2 = btn2.getAttribute('sentence');
+          }
         }
         
-        // Ищем следующую фразу
-        const nextDiv = subtitleDiv.nextElementSibling;
-        if (nextDiv && nextDiv.classList.contains('subtitle')) {
-          const nextAiBtn = nextDiv.querySelector('.aiTranslate');
-          if (nextAiBtn) nextSentence = nextAiBtn.getAttribute('sentence');
+        // Ищем следующую фразу (1 шаг вперед)
+        const next1 = subtitleDiv.nextElementSibling;
+        if (next1 && next1.classList.contains('subtitle')) {
+          const btnNext = next1.querySelector('.aiTranslate');
+          if (btnNext) nextSentence = btnNext.getAttribute('sentence');
         }
       }
 
       // Формируем итоговый промпт с контекстом
       let contextualizedPrompt = "";
-      if (prevSentence || nextSentence) {
+      if (prevSentence1 || prevSentence2 || nextSentence) {
         contextualizedPrompt = "Контекст сцены:\n";
-        if (prevSentence) contextualizedPrompt += `[Предыдущая фраза]: ${prevSentence}\n`;
+        if (prevSentence2) contextualizedPrompt += `[Фраза ранее]: ${prevSentence2}\n`;
+        if (prevSentence1) contextualizedPrompt += `[Предыдущая фраза]: ${prevSentence1}\n`;
         if (nextSentence) contextualizedPrompt += `[Следующая фраза]: ${nextSentence}\n`;
         contextualizedPrompt += `\nЦелевая фраза для разбора:\n${sentence}`;
       } else {
