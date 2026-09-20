@@ -414,6 +414,7 @@ window.addEventListener('load', function() {
   let fileSize = 0;
   let fileName = '';
   let pauseWas = 0;
+  let loopMode = 0; // 0: нет, 1: файл, 2: фраза, 3: выделенные
 
   videoFileInput.addEventListener('change', (event) => {
     const file = event.target.files[0];
@@ -470,8 +471,8 @@ window.addEventListener('load', function() {
     const lines = data.split(/\r?\n/);
     const isLrc = data.match(/^\[\d{2}:\d{2}\.\d{2,3}\]/m);
 
-    // ЗАЗОР ДЛЯ LRC: Отсекаем последние 0.3 секунды фразы, чтобы не цеплять следующий звук
-    const lrcGap = 0.3; 
+    // ИЗМЕНЕНИЕ: Убираем огромный зазор для LRC (меняем 0.3 на 0.02 для бесшовной склейки)
+    const lrcGap = 0.02; 
 
     if (isLrc) {
       for (let i = 0; i < lines.length; i++) {
@@ -671,12 +672,16 @@ window.addEventListener('load', function() {
   }
 
   // ==========================================
-  // 5. СИНХРОНИЗАЦИЯ, ПАНЕЛЬ УПРАВЛЕНИЯ И АВТОПАУЗА
+  // 5. СИНХРОНИЗАЦИЯ, ПАНЕЛЬ УПРАВЛЕНИЯ И АВТОПАУЗА (ОПТИМИЗИРОВАНО)
   // ==========================================
   const audioProgressBar = document.getElementById('audioProgressBar');
   const currentTimeDisplay = document.getElementById('currentTimeDisplay');
   const durationDisplay = document.getElementById('durationDisplay');
   let oldIndex = -1;
+  
+  // НОВЫЕ ПЕРЕМЕННЫЕ ДЛЯ ЦИКЛА
+  let isTracking = false;
+  let animFrameId = null;
 
   function formatTime(seconds) {
     if (isNaN(seconds)) return "0:00";
@@ -685,7 +690,10 @@ window.addEventListener('load', function() {
     return m + ":" + (s < 10 ? "0" : "") + s;
   }
 
-  videoPlayer.addEventListener('timeupdate', () => {
+  // НОВАЯ ФУНКЦИЯ ТРЕКИНГА (Вызывается ~60 раз в секунду)
+  function trackPlayback() {
+    if (!isTracking) return;
+
     const currentTime = videoPlayer.currentTime;
 
     if (videoPlayer.duration) {
@@ -771,10 +779,10 @@ window.addEventListener('load', function() {
     // =====================================
     // ЛОГИКА АВТОПАУЗЫ И ЗАЦИКЛИВАНИЯ
     // =====================================
-    const safetyBuffer = 0.15; 
+    // ИЗМЕНЕНИЕ: Существенно уменьшен буфер безопасности (с 0.15 до 0.02)
+    const safetyBuffer = 0.02; 
 
     if (loopMode === 3) {
-      // Режим 3: Непрерывное зацикливание всего выделенного диапазона
       const checkedBoxes = Array.from(document.querySelectorAll('.phrase-checkbox:checked'));
       
       if (checkedBoxes.length > 0) {
@@ -788,24 +796,20 @@ window.addEventListener('load', function() {
           rangeEnd = videoPlayer.duration;
         }
 
-        // --- НОВОЕ ИСПРАВЛЕНИЕ: Защита от воспроизведения ДО начала диапазона ---
         if (currentTime < (rangeStart - 0.1)) {
           videoPlayer.currentTime = rangeStart;
-          videoPlayer.play();
-          pauseWas = 0; // Сбрасываем триггер паузы
+          // Убрано videoPlayer.play() изнутри цикла во избежание конфликтов Play API
+          pauseWas = 0; 
         } 
-        // Если дошли до конца последней выделенной фразы
         else if (currentTime >= (rangeEnd - safetyBuffer)) {
           if (pauseWas === 0) {
             pauseWas = 1;
             videoPlayer.currentTime = rangeStart;
-            videoPlayer.play();
           }
-        } else if (currentTime < (rangeEnd - safetyBuffer - 0.1)) {
+        } else if (currentTime < (rangeEnd - safetyBuffer - 0.05)) {
           pauseWas = 0;
         }
       } else {
-        // Если галочек нет, но включен режим 3 — просто выполняем автопаузу (как в режиме 0)
         if (currentSubtitleTopIndex !== -1) {
           let currentEndTime = subtitlesTop[currentSubtitleTopIndex].endTime;
           if (videoPlayer.duration && currentEndTime >= videoPlayer.duration) currentEndTime = videoPlayer.duration;
@@ -815,16 +819,14 @@ window.addEventListener('load', function() {
               pauseWas = 1;
               if (stopAfterSubtitleCheckbox && stopAfterSubtitleCheckbox.checked) videoPlayer.pause();
             }
-          } else if (currentTime < (currentEndTime - safetyBuffer - 0.1)) {
+          } else if (currentTime < (currentEndTime - safetyBuffer - 0.05)) {
             pauseWas = 0;
           }
         }
       }
     } else if (currentSubtitleTopIndex !== -1) {
-      // Режимы 0, 1, 2: Стандартная пофразная логика
       let currentEndTime = subtitlesTop[currentSubtitleTopIndex].endTime;
       
-      // ИСПРАВЛЕНИЕ 2: Защита для последней фразы файла в обычных режимах
       if (videoPlayer.duration && currentEndTime >= videoPlayer.duration) {
         currentEndTime = videoPlayer.duration;
       }
@@ -835,18 +837,20 @@ window.addEventListener('load', function() {
 
           if (loopMode === 2) {
             videoPlayer.currentTime = subtitlesTop[currentSubtitleTopIndex].startTime;
-            videoPlayer.play();
           } else if (loopMode === 0 || loopMode === 1) {
             if (stopAfterSubtitleCheckbox && stopAfterSubtitleCheckbox.checked) {
               videoPlayer.pause();
             }
           }
         }
-      } else if (currentTime < (currentEndTime - safetyBuffer - 0.1)) {
+      } else if (currentTime < (currentEndTime - safetyBuffer - 0.05)) {
         pauseWas = 0;
       }
     }
-  }); 
+
+    // Зацикливаем функцию до тех пор, пока трек воспроизводится
+    animFrameId = requestAnimationFrame(trackPlayback);
+  }
 
   // ИСПРАВЛЕНИЕ 3 (АБСОЛЮТНАЯ СТРАХОВКА): Обработка нативного конца файла
   videoPlayer.addEventListener('ended', () => {
@@ -870,7 +874,7 @@ window.addEventListener('load', function() {
   }
 
   // ==========================================
-  // 6. МОБИЛЬНЫЕ КНОПКИ ПЛЕЕРА
+  // 6. МОБИЛЬНЫЕ КНОПКИ ПЛЕЕРА И УПРАВЛЕНИЕ ЦИКЛОМ
   // ==========================================
   const playPauseIcon = document.getElementById('playPauseIcon');
 
@@ -879,6 +883,11 @@ window.addEventListener('load', function() {
         playPauseIcon.classList.remove('bi-play-circle-fill');
         playPauseIcon.classList.add('bi-pause-circle-fill');
     }
+    
+    // ИЗМЕНЕНИЕ: Запускаем высокоточный цикл при старте воспроизведения
+    isTracking = true;
+    if (animFrameId) cancelAnimationFrame(animFrameId);
+    animFrameId = requestAnimationFrame(trackPlayback);
   });
   
   videoPlayer.addEventListener('pause', () => {
@@ -886,6 +895,10 @@ window.addEventListener('load', function() {
         playPauseIcon.classList.remove('bi-pause-circle-fill');
         playPauseIcon.classList.add('bi-play-circle-fill');
     }
+    
+    // ИЗМЕНЕНИЕ: Останавливаем цикл при паузе
+    isTracking = false;
+    if (animFrameId) cancelAnimationFrame(animFrameId);
   });
 
   document.getElementById('btnPlayPause').addEventListener('click', () => {
@@ -1210,7 +1223,7 @@ window.addEventListener('load', function() {
   // ==========================================
   // 9. ЗАЦИКЛИВАНИЕ И МНОЖЕСТВЕННОЕ ВЫДЕЛЕНИЕ
   // ==========================================
-  let loopMode = 0; // 0: нет, 1: файл, 2: фраза, 3: выделенные
+
   const loopIcons = ['bi-arrow-right', 'bi-repeat', 'bi-repeat-1', 'bi-list-check'];
   const loopColors = ['text-secondary', 'text-light', 'text-warning', 'text-success'];
   const loopKeys = ['loopNone', 'loopFile', 'loopPhrase', 'loopSelected'];
