@@ -465,14 +465,13 @@ window.addEventListener('load', function() {
     });
   }
 
-  // Функция парсинга субтитров (SRT и LRC с зазором)[cite: 1]
+  // Функция парсинга субтитров (SRT и LRC с зазором)
   function parseSrt(data) {
     const subtitles = [];
     const lines = data.split(/\r?\n/);
     const isLrc = data.match(/^\[\d{2}:\d{2}\.\d{2,3}\]/m);
 
-    // ИЗМЕНЕНИЕ: Убираем огромный зазор для LRC (меняем 0.3 на 0.02 для бесшовной склейки)
-    const lrcGap = 0.02; 
+    const lrcGap = 0.02; // Микрозазор для отработки логики смены индекса и автопаузы
 
     if (isLrc) {
       for (let i = 0; i < lines.length; i++) {
@@ -488,14 +487,16 @@ window.addEventListener('load', function() {
           const text = escapeHtml(match[4].trim());
           
           if (text !== '') {
-            subtitles.push({ startTime: startTime, endTime: startTime + 5, text: text });
+            // Временный endTime. Для самой последней фразы в файле даем запас времени
+            subtitles.push({ startTime: startTime, endTime: startTime + 10, text: text });
           }
         }
       }
-      // Применяем зазор
+      
+      // Восстановленная логика: фраза "висит" до самого начала следующей минус зазор
       for (let i = 0; i < subtitles.length - 1; i++) {
         const nextStart = subtitles[i + 1].startTime;
-        subtitles[i].endTime = (nextStart - subtitles[i].startTime > lrcGap) ? nextStart - lrcGap : nextStart;
+        subtitles[i].endTime = nextStart - lrcGap;
       }
     } else {
       let startTime, endTime, text;
@@ -702,6 +703,8 @@ window.addEventListener('load', function() {
       durationDisplay.textContent = formatTime(videoPlayer.duration);
     }
 
+    // --- КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ: Сбрасываем индекс в -1 перед поиском ---
+    currentSubtitleTopIndex = -1;
     for (let i = 0; i < subtitlesTop.length; i++) {
       if (currentTime >= subtitlesTop[i].startTime && currentTime < subtitlesTop[i].endTime) {
         currentSubtitleTopIndex = i;
@@ -726,6 +729,7 @@ window.addEventListener('load', function() {
       subtitlesElements.forEach((subtitle) => {
         const subNumber = parseInt(subtitle.getAttribute('subNumber'));
         
+        // Если индекс совпал (мы внутри фразы) — подсвечиваем и скроллим
         if (subNumber === currentSubtitleTopIndex) {
           subtitle.classList.add('subtitleCurrent');
 
@@ -764,6 +768,7 @@ window.addEventListener('load', function() {
             }
           }
         } else {
+          // Снимаем выделение со всех остальных (и с текущей, если мы вошли в тишину)
           subtitle.classList.remove('subtitleCurrent');
         }
       });
@@ -779,7 +784,6 @@ window.addEventListener('load', function() {
     // =====================================
     // ЛОГИКА АВТОПАУЗЫ И ЗАЦИКЛИВАНИЯ
     // =====================================
-    // ИЗМЕНЕНИЕ: Существенно уменьшен буфер безопасности (с 0.15 до 0.02)
     const safetyBuffer = 0.02; 
 
     if (loopMode === 3) {
@@ -798,7 +802,6 @@ window.addEventListener('load', function() {
 
         if (currentTime < (rangeStart - 0.1)) {
           videoPlayer.currentTime = rangeStart;
-          // Убрано videoPlayer.play() изнутри цикла во избежание конфликтов Play API
           pauseWas = 0; 
         } 
         else if (currentTime >= (rangeEnd - safetyBuffer)) {
