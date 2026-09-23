@@ -280,85 +280,129 @@
       </div>
 
       <!-- Аккордеон: Глубокие настройки -->
-      <div class="accordion accordion-flush bg-dark" id="settingsAccordion">
-        
-        <!-- Языки -->
-        <div class="accordion-item bg-dark border-secondary">
-          <h2 class="accordion-header">
-            <button class="accordion-button collapsed bg-dark text-light" type="button" data-bs-toggle="collapse" data-bs-target="#collapseLang" data-i18n="languagesTitle">
-              <i class="bi bi-globe me-2"></i> Мови перекладу та озвучення
-            </button>
-          </h2>
-          <div id="collapseLang" class="accordion-collapse collapse" data-bs-parent="#settingsAccordion">
-            <div class="accordion-body">
-              <div class="mb-3">
-                <label class="form-label small" data-i18n="learningLangLabel">Мова вивчення (Озвучення)</label>
-                <select class="form-select form-select-sm bg-dark text-light border-secondary" id="sl">
-                  <option value="en" data-i18n="langEn">Англійська</option>
-                  <option value="de" data-i18n="langDe">Німецька</option>
-                  <option value="fr" data-i18n="langFr">Французька</option>
-                  <option value="es" data-i18n="langEs">Іспанська</option>
-                  <option value="it" data-i18n="langIt">Італійська</option>
-                  <option value="pl" data-i18n="langPl">Польська</option>
-                  <option value="uk" data-i18n="langUk">Українська</option>
-                  <option value="ru" data-i18n="langRu">Російська</option>
-                </select>
-              </div>
-              <div>
-                <label class="form-label small" data-i18n="nativeLangLabel">Рідна мова (Переклад)</label>
-                <select class="form-select form-select-sm bg-dark text-light border-secondary" id="tl">
-                  <option value="uk" data-i18n="langUk">Українська</option>
-                  <option value="ru" data-i18n="langRu">Російська</option>
-                  <option value="en" data-i18n="langEn">Англійська</option>
-                  <option value="de" data-i18n="langDe">Німецька</option>
-                  <option value="fr" data-i18n="langFr">Французька</option>
-                  <option value="es" data-i18n="langEs">Іспанська</option>
-                  <option value="it" data-i18n="langIt">Італійська</option>
-                  <option value="pl" data-i18n="langPl">Польська</option>
-                </select>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- DeepSeek API -->
-        <div class="accordion-item bg-dark border-secondary">
-          <h2 class="accordion-header">
-            <button class="accordion-button collapsed bg-dark text-light" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAI" data-i18n="aiTitle">
-              <i class="bi bi-robot me-2"></i> Нейромережа (DeepSeek)
-            </button>
-          </h2>
-          <div id="collapseAI" class="accordion-collapse collapse" data-bs-parent="#settingsAccordion">
-            <div class="accordion-body">
-              <div class="mb-3">
-                <label class="form-label small" data-i18n="apiKeyLabel">API-ключ DeepSeek:</label>
-                <input type="text" class="form-control form-control-sm bg-dark text-light border-secondary" id="deepseekApiKey" placeholder="sk-...">
-              </div>
-              <div>
-                <label class="form-label small" data-i18n="systemPromptLabel">Системна інструкція:</label>
-                <textarea class="form-control form-control-sm bg-dark text-light border-secondary" id="deepseekInstruction" rows="6"></textarea>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Управление данными / Сброс -->
-        <div class="accordion-item bg-dark border-secondary">
-          <h2 class="accordion-header">
-            <button class="accordion-button collapsed bg-dark text-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSystem" data-i18n="systemDataTitle">
-              <i class="bi bi-trash3 me-2"></i> Скидання даних
-            </button>
-          </h2>
-          <div id="collapseSystem" class="accordion-collapse collapse" data-bs-parent="#settingsAccordion">
-            <div class="accordion-body text-center">
-              <button class="btn btn-outline-danger w-100" id="btnResetSettings" data-i18n="resetSettingsBtn">
-                <i class="bi bi-exclamation-triangle"></i> Скинути всі налаштування
+      <div class="card bg-dark border-secondary mb-3 overflow-hidden">
+        <div class="accordion accordion-flush bg-dark" id="settingsAccordion">
+          
+          <!-- Языки -->
+          <div class="accordion-item bg-dark border-secondary">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed bg-dark text-light" type="button" data-bs-toggle="collapse" data-bs-target="#collapseLang" data-i18n="languagesTitle">
+                <i class="bi bi-globe me-2"></i> Мови перекладу та озвучення
               </button>
+            </h2>
+            <div id="collapseLang" class="accordion-collapse collapse" data-bs-parent="#settingsAccordion">
+              <div class="accordion-body">
+                <div class="mb-3">
+                  <label class="form-label small" data-i18n="learningLangLabel">Мова вивчення (Озвучення)</label>
+                  <select class="form-select form-select-sm bg-dark text-light border-secondary" id="sl">
+                    <option value="en" data-i18n="langEn">Англійська</option>
+                    <option value="de" data-i18n="langDe">Німецька</option>
+                    <option value="fr" data-i18n="langFr">Французька</option>
+                    <option value="es" data-i18n="langEs">Іспанська</option>
+                    <option value="it" data-i18n="langIt">Італійська</option>
+                    <option value="pl" data-i18n="langPl">Польська</option>
+                    <option value="uk" data-i18n="langUk">Українська</option>
+                    <option value="ru" data-i18n="langRu">Російська</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="form-label small" data-i18n="nativeLangLabel">Рідна мова (Переклад)</label>
+                  <select class="form-select form-select-sm bg-dark text-light border-secondary" id="tl">
+                    <option value="uk" data-i18n="langUk">Українська</option>
+                    <option value="ru" data-i18n="langRu">Російська</option>
+                    <option value="en" data-i18n="langEn">Англійська</option>
+                    <option value="de" data-i18n="langDe">Німецька</option>
+                    <option value="fr" data-i18n="langFr">Французька</option>
+                    <option value="es" data-i18n="langEs">Іспанська</option>
+                    <option value="it" data-i18n="langIt">Італійська</option>
+                    <option value="pl" data-i18n="langPl">Польська</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Google Translate Proxy -->
+          <div class="accordion-item bg-dark border-secondary">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed bg-dark text-light" type="button" data-bs-toggle="collapse" data-bs-target="#collapseProxy" data-i18n="proxyTitle">
+                <i class="bi bi-translate me-2"></i> Google Перекладач
+              </button>
+            </h2>
+            <div id="collapseProxy" class="accordion-collapse collapse" data-bs-parent="#settingsAccordion">
+              <div class="accordion-body">
+                <div class="form-check form-switch mb-3">
+                  <input class="form-check-input" type="checkbox" id="useProxy">
+                  <label class="form-check-label small" for="useProxy" data-i18n="useProxyLabel">Використовувати власний проксі</label>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label small">URL проксі (translate.php):</label>
+                  <input type="text" class="form-control form-control-sm bg-dark text-light border-secondary" id="customProxyUrl" placeholder="https://domain.com/translate.php">
+                </div>
+                <div>
+                  <label class="form-label small">Токен доступу:</label>
+                  <input type="text" class="form-control form-control-sm bg-dark text-light border-secondary" id="customProxyToken">
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- DeepSeek API -->
+          <div class="accordion-item bg-dark border-secondary">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed bg-dark text-light" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAI" data-i18n="aiTitle">
+                <i class="bi bi-robot me-2"></i> Нейромережа (DeepSeek)
+              </button>
+            </h2>
+            <div id="collapseAI" class="accordion-collapse collapse" data-bs-parent="#settingsAccordion">
+              <div class="accordion-body">
+                <div class="mb-3">
+                  <label class="form-label small" data-i18n="apiKeyLabel">API-ключ DeepSeek:</label>
+                  <input type="text" class="form-control form-control-sm bg-dark text-light border-secondary" id="deepseekApiKey" placeholder="sk-...">
+                </div>
+                <div>
+                  <label class="form-label small" data-i18n="systemPromptLabel">Системна інструкція:</label>
+                  <textarea class="form-control form-control-sm bg-dark text-light border-secondary" id="deepseekInstruction" rows="6"></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Горячие клавиши -->
+          <div class="accordion-item bg-dark border-secondary">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed bg-dark text-light" type="button" data-bs-toggle="collapse" data-bs-target="#collapseHotkeys" data-i18n="hotkeysTitle">
+                <i class="bi bi-keyboard me-2"></i> Гарячі клавіші
+              </button>
+            </h2>
+            <div id="collapseHotkeys" class="accordion-collapse collapse" data-bs-parent="#settingsAccordion">
+              <div class="accordion-body">
+                <div class="d-flex flex-column gap-3 small">
+                  <div><kbd class="bg-secondary text-light px-2 py-1 fs-6">Space</kbd> <span class="ms-2" data-i18n="hotkeySpace">Плей / Пауза</span></div>
+                  <div><kbd class="bg-secondary text-light px-2 py-1 fs-6">A</kbd> <span class="ms-2" data-i18n="hotkeyA">Назад (попередня фраза)</span></div>
+                  <div><kbd class="bg-secondary text-light px-2 py-1 fs-6">S</kbd> <span class="ms-2" data-i18n="hotkeyS">Повторити поточну фразу</span></div>
+                  <div><kbd class="bg-secondary text-light px-2 py-1 fs-6">D</kbd> <span class="ms-2" data-i18n="hotkeyD">Вперед (наступна фраза)</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Управление данными / Сброс -->
+          <div class="accordion-item bg-dark border-secondary">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed bg-dark text-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSystem" data-i18n="systemDataTitle">
+                <i class="bi bi-trash3 me-2"></i> Скидання даних
+              </button>
+            </h2>
+            <div id="collapseSystem" class="accordion-collapse collapse" data-bs-parent="#settingsAccordion">
+              <div class="accordion-body text-center">
+                <button class="btn btn-outline-danger w-100" id="btnResetSettings" data-i18n="resetSettingsBtn">
+                  <i class="bi bi-exclamation-triangle"></i> Скинути всі налаштування
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </div>
-
       
 
     </div>
@@ -381,7 +425,7 @@
 
   <!-- Подключение скриптов -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="mobile_player.js?ver=49"></script>
+  <script src="mobile_player.js?ver=70"></script>
 
 </body>
 </html>

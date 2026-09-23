@@ -23,6 +23,9 @@ const uiTranslations = {
     googleErrLimit: "Ліміт запитів Google. Зачекайте.",
     googleErrServer: "Помилка сервера: ",
     googleErrNet: "Блокування мережі (Помилка CORS / CGNAT)",
+    proxyTitle: "Google Перекладач",
+    useProxyLabel: "Використовувати проксі",
+    proxyHint: "Увімкніть, якщо переклад не працює (помилка CORS).",
     
     // Новые ключи для зацикливания
     loopNone: "Без зациклювання",
@@ -49,6 +52,12 @@ const uiTranslations = {
     enterApiKey: "Введіть API ключ DeepSeek у налаштуваннях.",
     errorResponse: "Помилка відповіді:",
     errorNetwork: "Мережева помилка:",
+
+    hotkeysTitle: "Гарячі клавіші",
+    hotkeySpace: "Плей / Пауза",
+    hotkeyA: "Назад (попередня фраза)",
+    hotkeyS: "Повторити поточну фразу",
+    hotkeyD: "Вперед (наступна фраза)",
 
     systemDataTitle: "Скидання даних",
     resetSettingsBtn: "Скинути всі налаштування",
@@ -79,6 +88,9 @@ const uiTranslations = {
     googleErrLimit: "Лимит запросов Google. Подождите.",
     googleErrServer: "Ошибка сервера: ",
     googleErrNet: "Блокировка сети (Ошибка CORS / CGNAT)",
+    proxyTitle: "Google Переводчик",
+    useProxyLabel: "Использовать прокси",
+    proxyHint: "Включите, если перевод не работает (ошибка CORS).",
     
     loopNone: "Без зацикливания",
     loopFile: "Зацикливание файла",
@@ -101,6 +113,12 @@ const uiTranslations = {
     enterApiKey: "Введите API ключ DeepSeek в настройках.",
     errorResponse: "Ошибка ответа:",
     errorNetwork: "Сетевая ошибка:",
+
+    hotkeysTitle: "Горячие клавиши",
+    hotkeySpace: "Плей / Пауза",
+    hotkeyA: "Назад (предыдущая фраза)",
+    hotkeyS: "Повторить текущую фразу",
+    hotkeyD: "Вперед (следующая фраза)",
 
     systemDataTitle: "Сброс данных",
     resetSettingsBtn: "Сбросить все настройки",
@@ -131,6 +149,9 @@ const uiTranslations = {
     googleErrLimit: "Google request limit. Please wait.",
     googleErrServer: "Server error: ",
     googleErrNet: "Network blocked (CORS / CGNAT Error)",
+    proxyTitle: "Google Translate",
+    useProxyLabel: "Use proxy",
+    proxyHint: "Enable if translation fails (CORS error).",
     
     loopNone: "No loop",
     loopFile: "Loop file",
@@ -153,6 +174,12 @@ const uiTranslations = {
     enterApiKey: "Enter DeepSeek API key in settings.",
     errorResponse: "Response Error:",
     errorNetwork: "Network Error:",
+
+    hotkeysTitle: "Hotkeys",
+    hotkeySpace: "Play / Pause",
+    hotkeyA: "Back (previous phrase)",
+    hotkeyS: "Repeat current phrase",
+    hotkeyD: "Forward (next phrase)",
 
     systemDataTitle: "Reset data",
     resetSettingsBtn: "Reset all settings",
@@ -183,6 +210,9 @@ const uiTranslations = {
     googleErrLimit: "Google-Anfragelimit erreicht. Bitte warten.",
     googleErrServer: "Serverfehler: ",
     googleErrNet: "Netzwerk blockiert (CORS / CGNAT Fehler)",
+    proxyTitle: "Google Übersetzer",
+    useProxyLabel: "Öffentlichen Proxy verwenden",
+    proxyHint: "Aktivieren, wenn die Übersetzung fehlschlägt (CORS-Fehler).",
     
     loopNone: "Kein Loop",
     loopFile: "Datei im Loop",
@@ -205,6 +235,12 @@ const uiTranslations = {
     enterApiKey: "Geben Sie den DeepSeek-API-Schlüssel in den Einstellungen ein.",
     errorResponse: "Antwortfehler:",
     errorNetwork: "Netzwerkfehler:",
+
+    hotkeysTitle: "Tastenkombinationen",
+    hotkeySpace: "Play / Pause",
+    hotkeyA: "Zurück (vorherige Phrase)",
+    hotkeyS: "Aktuelle Phrase wiederholen",
+    hotkeyD: "Vor (nächste Phrase)",
 
     systemDataTitle: "Daten zurücksetzen",
     resetSettingsBtn: "Alle Einstellungen zurücksetzen",
@@ -235,6 +271,9 @@ const uiTranslations = {
     googleErrLimit: "Límite de solicitudes de Google. Por favor, espere.",
     googleErrServer: "Error del servidor: ",
     googleErrNet: "Red bloqueada (Error CORS / CGNAT)",
+    proxyTitle: "Traductor de Google",
+    useProxyLabel: "Usar proxy público",
+    proxyHint: "Habilite si la traducción falla (error CORS).",
     
     loopNone: "Sin repetición",
     loopFile: "Repetir archivo",
@@ -257,6 +296,12 @@ const uiTranslations = {
     enterApiKey: "Introduzca la clave API de DeepSeek en configuración.",
     errorResponse: "Error de respuesta:",
     errorNetwork: "Error de red:",
+
+    hotkeysTitle: "Teclas de acceso rápido",
+    hotkeySpace: "Reproducir / Pausar",
+    hotkeyA: "Atrás (frase anterior)",
+    hotkeyS: "Repetir frase actual",
+    hotkeyD: "Adelante (frase siguiente)",
 
     systemDataTitle: "Restablecer datos",
     resetSettingsBtn: "Restablecer todos los ajustes",
@@ -287,6 +332,9 @@ const uiTranslations = {
     googleErrLimit: "Limite de requêtes Google. Veuillez patienter.",
     googleErrServer: "Erreur du serveur: ",
     googleErrNet: "Réseau bloqué (Erreur CORS / CGNAT)",
+    proxyTitle: "Google Traduction",
+    useProxyLabel: "Utiliser un proxy public",
+    proxyHint: "Activer si la traduction échoue (erreur CORS).",
     
     loopNone: "Sans boucle",
     loopFile: "Boucler le fichier",
@@ -310,6 +358,12 @@ const uiTranslations = {
     errorResponse: "Erreur de réponse:",
     errorNetwork: "Erreur réseau:",
 
+    hotkeysTitle: "Raccourcis clavier",
+    hotkeySpace: "Lecture / Pause",
+    hotkeyA: "Précédent (phrase précédente)",
+    hotkeyS: "Répéter la phrase actuelle",
+    hotkeyD: "Suivant (phrase suivante)",
+
     systemDataTitle: "Réinitialiser les données",
     resetSettingsBtn: "Réinitialiser tous les paramètres",
     confirmReset: "Êtes-vous sûr de vouloir effacer tous les paramètres enregistrés et le cache ? L'application va redémarrer."
@@ -327,6 +381,8 @@ window.addEventListener('load', function() {
   const selectTl = document.getElementById('tl');
   const stopAfterSubtitleCheckbox = document.getElementById('stopAfterSubtitle');
   const speakOnTapCheckbox = document.getElementById('speakOnTap');
+
+  const useProxyCheckbox = document.getElementById('useProxy');
 
   const defaultInstruction = `Ты — строгий лингвистический анализатор. 
 
@@ -370,6 +426,12 @@ window.addEventListener('load', function() {
     speakOnTapCheckbox.checked = savedSpeakOnTap === "true";
   }
 
+  const savedUseProxy = localStorage.getItem("useProxyCheckbox");
+  if (useProxyCheckbox && savedUseProxy !== null) {
+    useProxyCheckbox.checked = savedUseProxy === "true";
+  }
+
+
   // Сохранение настроек при изменении[cite: 1]
   if (deepseekApiKeyInput) deepseekApiKeyInput.addEventListener('change', (e) => localStorage.setItem('deepseekApiKey', e.target.value));
   if (deepseekInstructionInput) deepseekInstructionInput.addEventListener('change', (e) => localStorage.setItem('deepseekInstruction', e.target.value));
@@ -377,6 +439,24 @@ window.addEventListener('load', function() {
   if (selectTl) selectTl.addEventListener('change', (e) => localStorage.setItem('selectedTlValue', e.target.value));
   if (stopAfterSubtitleCheckbox) stopAfterSubtitleCheckbox.addEventListener('change', function() { localStorage.setItem("stopAfterSubtitleCheckbox", this.checked); });
   if (speakOnTapCheckbox) speakOnTapCheckbox.addEventListener('change', function() { localStorage.setItem("speakOnTapCheckbox", this.checked); });
+
+  if (useProxyCheckbox) {
+    useProxyCheckbox.addEventListener('change', function() { 
+      localStorage.setItem("useProxyCheckbox", this.checked); 
+    });
+  }
+
+  // Для прокси
+  const customProxyUrlInput = document.getElementById('customProxyUrl');
+  const customProxyTokenInput = document.getElementById('customProxyToken');
+
+  // Загрузка
+  if (customProxyUrlInput) customProxyUrlInput.value = localStorage.getItem('customProxyUrl') || '';
+  if (customProxyTokenInput) customProxyTokenInput.value = localStorage.getItem('customProxyToken') || '';
+
+  // Сохранение
+  if (customProxyUrlInput) customProxyUrlInput.addEventListener('change', (e) => localStorage.setItem('customProxyUrl', e.target.value));
+  if (customProxyTokenInput) customProxyTokenInput.addEventListener('change', (e) => localStorage.setItem('customProxyToken', e.target.value));
 
   // ==========================================
   // 2. НАВИГАЦИЯ МЕЖДУ ЭКРАНАМИ
@@ -609,6 +689,68 @@ window.addEventListener('load', function() {
     const sl = selectSl ? selectSl.value : 'en';
     const tl = selectTl ? selectTl.value : 'ru';
     
+    const lang = localStorage.getItem('interfaceLang') || 'uk';
+    const t = uiTranslations[lang];
+    
+    const xhr = new XMLHttpRequest();
+    
+    const isProxyEnabled = document.getElementById('useProxy') ? 
+                           document.getElementById('useProxy').checked : 
+                           (localStorage.getItem("useProxyCheckbox") === "true");
+
+    let url;
+    if (isProxyEnabled) {
+      const proxyUrl = localStorage.getItem('customProxyUrl') || '';
+      const proxyToken = localStorage.getItem('customProxyToken') || '';
+      
+      if (!proxyUrl) {
+        callback("Помилка: Вкажіть URL проксі в налаштуваннях");
+        return;
+      }
+      
+      url = `${proxyUrl}?token=${encodeURIComponent(proxyToken)}&sl=${sl}&tl=${tl}&q=${encodeURIComponent(text.trim())}`;
+    } else {
+      url = "https://translate.googleapis.com/translate_a/single?client=gtx&sl=" + sl + "&tl=" + tl + "&dt=t&dt=at&dt=ex&q=" + encodeURIComponent(text.trim());
+    }
+    
+    xhr.open("GET", url, true);
+    
+    xhr.onload = function() {
+      if (xhr.status === 200) {
+        try {
+          const response = JSON.parse(xhr.responseText);
+          if (response && response[0]) {
+            let translation = '';
+            for (const transl of response[0]) {
+              if (transl[0]) translation += transl[0];
+            }
+            callback(translation);
+          } else {
+            callback(t.googleErrStruct);
+          }
+        } catch (e) {
+          callback(t.googleErrParse);
+        }
+      } else if (xhr.status === 403) {
+        callback("Помилка 403: Невірний токен доступу");
+      } else if (xhr.status === 429) {
+        callback(t.googleErrLimit);
+      } else {
+        callback(t.googleErrServer + xhr.status);
+      }
+    };
+    
+    xhr.onerror = function() {
+      callback(t.googleErrNet);
+    };
+    
+    xhr.send();
+  }
+
+  /*function translateGoogle(text, callback) {
+    const sl = selectSl ? selectSl.value : 'en';
+    const tl = selectTl ? selectTl.value : 'ru';
+    
     // Получаем текущий язык для ошибок
     const lang = localStorage.getItem('interfaceLang') || 'uk';
     const t = uiTranslations[lang];
@@ -646,7 +788,7 @@ window.addEventListener('load', function() {
     };
     
     xhr.send();
-  }
+  }*/
 
   function showTranslationInBottom(text) {
     isTranslationLocked = true;
