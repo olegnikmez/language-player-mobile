@@ -935,6 +935,12 @@ window.addEventListener('load', function() {
   // НОВЫЕ ПЕРЕМЕННЫЕ ДЛЯ ЦИКЛА
   let isTracking = false;
   let animFrameId = null;
+  let lastTrackedTime = 0; // Добавлена память о времени предыдущего кадра
+
+  // Кеширование состояния DOM для предотвращения layout thrashing
+  let lastDisplayedTime = "";
+  let lastDisplayedDuration = "";
+  let lastProgressBarValue = -1;
 
   function formatTime(seconds) {
     if (isNaN(seconds)) return "0:00";
@@ -948,17 +954,54 @@ window.addEventListener('load', function() {
     if (!isTracking) return;
 
     const currentTime = videoPlayer.currentTime;
+    
+    // Вычисляем дельту времени. Если она от 0 до 0.5 сек — это естественное воспроизведение (не ручная перемотка)
+    const timeDelta = currentTime - lastTrackedTime;
+    const isPlayingForward = timeDelta > 0 && timeDelta < 0.5;
 
     if (videoPlayer.duration) {
-      audioProgressBar.value = (currentTime / videoPlayer.duration) * 100;
-      currentTimeDisplay.textContent = formatTime(currentTime);
-      durationDisplay.textContent = formatTime(videoPlayer.duration);
+      const newProgress = (currentTime / videoPlayer.duration) * 100;
+      
+      // Обновляем ползунок только если изменение больше 0.05%
+      // Это сохраняет плавность, но срезает десятки лишних перерисовок в секунду
+      if (Math.abs(lastProgressBarValue - newProgress) > 0.05) {
+        audioProgressBar.value = newProgress;
+        lastProgressBarValue = newProgress;
+      }
+
+      // Текст обновляем СТРОГО раз в секунду, когда меняется строка
+      const formattedTime = formatTime(currentTime);
+      if (lastDisplayedTime !== formattedTime) {
+        currentTimeDisplay.textContent = formattedTime;
+        lastDisplayedTime = formattedTime;
+      }
+
+      // Длительность вычисляется один раз при загрузке метаданных
+      const formattedDuration = formatTime(videoPlayer.duration);
+      if (lastDisplayedDuration !== formattedDuration) {
+        durationDisplay.textContent = formattedDuration;
+        lastDisplayedDuration = formattedDuration;
+      }
     }
 
-    // --- КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ: Сбрасываем индекс в -1 перед поиском ---
+    // --- КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ: Поиск индекса с устранением "слепых зон" ---
     currentSubtitleTopIndex = -1;
     for (let i = 0; i < subtitlesTop.length; i++) {
-      if (currentTime >= subtitlesTop[i].startTime && currentTime < subtitlesTop[i].endTime) {
+      let effectiveEndTime = subtitlesTop[i].endTime;
+      
+      // Если это не последняя фраза, продлеваем её границу до начала следующей.
+      // Это предотвращает исчезновение подсветки, если плеер остановился в микро-зазоре.
+      if (i < subtitlesTop.length - 1) {
+        const nextStart = subtitlesTop[i + 1].startTime;
+        if (nextStart > effectiveEndTime && (nextStart - effectiveEndTime) <= 0.5) {
+          effectiveEndTime = nextStart;
+        }
+      } else {
+        // Небольшой запас для самой последней фразы в файле
+        effectiveEndTime += 0.2; 
+      }
+
+      if (currentTime >= subtitlesTop[i].startTime && currentTime < effectiveEndTime) {
         currentSubtitleTopIndex = i;
         break;
       }
@@ -972,7 +1015,7 @@ window.addEventListener('load', function() {
       }
     }
 
-    if(oldIndex !== currentSubtitleTopIndex) {
+    if (oldIndex !== currentSubtitleTopIndex) {
       const container = document.getElementById('allTopSubs');
       const cRect = container.getBoundingClientRect();
       const isMovingDown = currentSubtitleTopIndex > oldIndex;
@@ -981,7 +1024,6 @@ window.addEventListener('load', function() {
       subtitlesElements.forEach((subtitle) => {
         const subNumber = parseInt(subtitle.getAttribute('subNumber'));
         
-        // Если индекс совпал (мы внутри фразы) — подсвечиваем и скроллим
         if (subNumber === currentSubtitleTopIndex) {
           subtitle.classList.add('subtitleCurrent');
 
@@ -1020,7 +1062,6 @@ window.addEventListener('load', function() {
             }
           }
         } else {
-          // Снимаем выделение со всех остальных (и с текущей, если мы вошли в тишину)
           subtitle.classList.remove('subtitleCurrent');
         }
       });
@@ -1033,76 +1074,61 @@ window.addEventListener('load', function() {
     }
 
     // =====================================
-    // ЛОГИКА АВТОПАУЗЫ И ЗАЦИКЛИВАНИЯ
+    // ЛОГИКА АВТОПАУЗЫ И ЗАЦИКЛИВАНИЯ (STATE MACHINE)
     // =====================================
     const safetyBuffer = 0.02; 
+    let handledByLoop3 = false;
 
     if (loopMode === 3) {
       const checkedBoxes = Array.from(document.querySelectorAll('.phrase-checkbox:checked'));
-      
       if (checkedBoxes.length > 0) {
+        handledByLoop3 = true;
         const firstIndex = parseInt(checkedBoxes[0].getAttribute('data-index'));
         const lastIndex = parseInt(checkedBoxes[checkedBoxes.length - 1].getAttribute('data-index'));
         
         const rangeStart = subtitlesTop[firstIndex].startTime;
         let rangeEnd = subtitlesTop[lastIndex].endTime;
+        if (videoPlayer.duration && rangeEnd > videoPlayer.duration) rangeEnd = videoPlayer.duration;
 
-        if (videoPlayer.duration && rangeEnd >= videoPlayer.duration) {
-          rangeEnd = videoPlayer.duration;
-        }
+        const triggerTime = rangeEnd - safetyBuffer;
 
+        // Если ползунок оттянули назад до начала зоны выделения
         if (currentTime < (rangeStart - 0.1)) {
           videoPlayer.currentTime = rangeStart;
-          pauseWas = 0; 
         } 
-        else if (currentTime >= (rangeEnd - safetyBuffer)) {
-          if (pauseWas === 0) {
-            pauseWas = 1;
-            videoPlayer.currentTime = rangeStart;
-          }
-        } else if (currentTime < (rangeEnd - safetyBuffer - 0.05)) {
-          pauseWas = 0;
-        }
-      } else {
-        if (currentSubtitleTopIndex !== -1) {
-          let currentEndTime = subtitlesTop[currentSubtitleTopIndex].endTime;
-          if (videoPlayer.duration && currentEndTime >= videoPlayer.duration) currentEndTime = videoPlayer.duration;
-
-          if (currentTime >= (currentEndTime - safetyBuffer)) {
-            if (pauseWas === 0) {
-              pauseWas = 1;
-              if (stopAfterSubtitleCheckbox && stopAfterSubtitleCheckbox.checked) videoPlayer.pause();
-            }
-          } else if (currentTime < (currentEndTime - safetyBuffer - 0.05)) {
-            pauseWas = 0;
-          }
+        // Математический отлов факта пересечения границы
+        else if (isPlayingForward && lastTrackedTime < triggerTime && currentTime >= triggerTime) {
+          videoPlayer.currentTime = rangeStart;
         }
       }
-    } else if (currentSubtitleTopIndex !== -1) {
-      let currentEndTime = subtitlesTop[currentSubtitleTopIndex].endTime;
-      
-      if (videoPlayer.duration && currentEndTime >= videoPlayer.duration) {
-        currentEndTime = videoPlayer.duration;
-      }
-      
-      if (currentTime >= (currentEndTime - safetyBuffer)) {
-        if (pauseWas === 0) {
-          pauseWas = 1;
-
+    } 
+    
+    if (!handledByLoop3 && isPlayingForward) {
+      // Ищем границу, которую мы ТОЛЬКО ЧТО пересекли
+      for (let i = 0; i < subtitlesTop.length; i++) {
+        let et = subtitlesTop[i].endTime;
+        if (videoPlayer.duration && et > videoPlayer.duration) et = videoPlayer.duration;
+        
+        const triggerTime = et - safetyBuffer;
+        
+        // Истина только один раз: если в прошлом кадре мы были ДО границы, а сейчас ПОСЛЕ
+        if (lastTrackedTime < triggerTime && currentTime >= triggerTime) {
           if (loopMode === 2) {
-            videoPlayer.currentTime = subtitlesTop[currentSubtitleTopIndex].startTime;
+            videoPlayer.currentTime = subtitlesTop[i].startTime;
           } else if (loopMode === 0 || loopMode === 1) {
             if (stopAfterSubtitleCheckbox && stopAfterSubtitleCheckbox.checked) {
               videoPlayer.pause();
+              // Фиксируем таймер точно на конце фразы. 
+              // Это идеально состыкуется с нашим предыдущим фиксом функции getActiveSubtitleIndex()
+              videoPlayer.currentTime = et; 
             }
           }
+          break; // Обрабатываем только одну границу за кадр
         }
-      } else if (currentTime < (currentEndTime - safetyBuffer - 0.05)) {
-        pauseWas = 0;
       }
     }
 
-    // Зацикливаем функцию до тех пор, пока трек воспроизводится
+    lastTrackedTime = currentTime;
     animFrameId = requestAnimationFrame(trackPlayback);
   }
 
@@ -1168,7 +1194,52 @@ window.addEventListener('load', function() {
     else videoPlayer.pause();
   });
 
+  // Вспомогательная функция для точного определения текущей фразы
+  // Защищает от инерции плеера после автопаузы с помощью небольшого буфера
+  function getActiveSubtitleIndex() {
+    if (!subtitlesTop.length) return -1;
+    const time = videoPlayer.currentTime;
+    
+    // Ищем с конца. Отнимаем 0.15 сек от текущего времени, 
+    // чтобы плеер "считал" себя в предыдущей фразе, если он остановился ровно на границе
+    for (let i = subtitlesTop.length - 1; i >= 0; i--) {
+      if (subtitlesTop[i].startTime <= time - 0.15) {
+        return i;
+      }
+    }
+    return 0; // На случай если находимся в самом начале файла
+  }
+
+  // Назад (A)
   document.getElementById('btnPrevSub').addEventListener('click', () => {
+    const idx = getActiveSubtitleIndex();
+    if (idx !== -1) {
+      const prevIdx = Math.max(0, idx - 1);
+      videoPlayer.currentTime = subtitlesTop[prevIdx].startTime;
+      videoPlayer.play();
+    }
+  });
+
+  // Повторить (S)
+  document.getElementById('btnRepeatSub').addEventListener('click', () => {
+    const idx = getActiveSubtitleIndex();
+    if (idx !== -1) {
+      videoPlayer.currentTime = subtitlesTop[idx].startTime;
+      videoPlayer.play();
+    }
+  });
+
+  // Вперед (D)
+  document.getElementById('btnNextSub').addEventListener('click', () => {
+    const idx = getActiveSubtitleIndex();
+    // Блокируем переход за пределы массива
+    if (idx !== -1 && idx < subtitlesTop.length - 1) {
+      videoPlayer.currentTime = subtitlesTop[idx + 1].startTime;
+      videoPlayer.play();
+    }
+  });
+
+  /*document.getElementById('btnPrevSub').addEventListener('click', () => {
     const currentSubtitle = document.querySelector('.subtitleCurrent');
     if (currentSubtitle && currentSubtitle.previousElementSibling) {
       videoPlayer.currentTime = parseFloat(currentSubtitle.previousElementSibling.getAttribute('start'));
@@ -1190,7 +1261,7 @@ window.addEventListener('load', function() {
       videoPlayer.currentTime = parseFloat(currentSubtitle.nextElementSibling.getAttribute('start'));
       videoPlayer.play();
     }
-  });
+  });*/
 
 
   // ==========================================
