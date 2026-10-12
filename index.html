@@ -183,11 +183,24 @@
         <!-- 2. Сетка кнопок (Play гарантированно по центру) -->
         <div class="audio-controls d-grid align-items-center" style="grid-template-columns: 1fr auto 1fr;">
           
-          <!-- Левый край: Настройки -->
-          <div class="d-flex justify-content-start">
+          <!-- Левый край: Настройки и Скорость -->
+          <div class="d-flex justify-content-start align-items-center gap-1">
             <button class="btn-control secondary text-secondary" id="btnGoSettings" title="Налаштування">
               <i class="bi bi-gear-fill"></i>
             </button>
+            
+            <!-- Селектор скорости (стилизован под простой текст) -->
+            <select id="playbackRateSelect" class="bg-transparent text-secondary border-0 shadow-none p-0 ps-1" style="width: auto; font-weight: 600; cursor: pointer; appearance: none; -webkit-appearance: none; background-image: none; outline: none; font-size: 1.05rem;">
+              <option value="0.6" class="bg-dark text-light">0.6x</option>
+              <option value="0.7" class="bg-dark text-light">0.7x</option>
+              <option value="0.8" class="bg-dark text-light">0.8x</option>
+              <option value="0.9" class="bg-dark text-light">0.9x</option>
+              <option value="1" class="bg-dark text-light" selected>1.0x</option>
+              <option value="1.2" class="bg-dark text-light">1.2x</option>
+              <option value="1.5" class="bg-dark text-light">1.5x</option>
+              <option value="1.8" class="bg-dark text-light">1.8x</option>
+              <option value="2" class="bg-dark text-light">2.0x</option>
+            </select>
           </div>
 
           <!-- Центр: Воспроизведение -->

@@ -542,6 +542,40 @@ window.addEventListener('load', function() {
   let pauseWas = 0;
   let loopMode = 0; // 0: нет, 1: файл, 2: фраза, 3: выделенные
 
+  // ==========================================
+  // УПРАВЛЕНИЕ СКОРОСТЬЮ ВОСПРОИЗВЕДЕНИЯ
+  // ==========================================
+  const playbackRateSelect = document.getElementById('playbackRateSelect');
+
+  // Принудительно включаем сохранение тембра голоса (Pitch)
+  videoPlayer.preservesPitch = true;
+  if ('mozPreservesPitch' in videoPlayer) videoPlayer.mozPreservesPitch = true;
+  if ('webkitPreservesPitch' in videoPlayer) videoPlayer.webkitPreservesPitch = true;
+
+  // Восстанавливаем сохраненную скорость из Local Storage
+  const savedRate = localStorage.getItem('playbackRate') || '1';
+  if (playbackRateSelect) {
+    playbackRateSelect.value = savedRate;
+    videoPlayer.playbackRate = parseFloat(savedRate);
+  }
+
+  // Слушатель изменения скорости пользователем
+  if (playbackRateSelect) {
+    playbackRateSelect.addEventListener('change', (e) => {
+      const rate = parseFloat(e.target.value);
+      videoPlayer.playbackRate = rate;
+      localStorage.setItem('playbackRate', e.target.value);
+    });
+  }
+
+  // КРИТИЧЕСКИ ВАЖНО: Браузеры автоматически сбрасывают playbackRate на 1.0 
+  // при загрузке нового файла (при смене videoPlayer.src). 
+  // Поэтому мы возвращаем пользовательскую скорость каждый раз при готовности файла.
+  videoPlayer.addEventListener('loadedmetadata', () => {
+    const currentRate = localStorage.getItem('playbackRate') || '1';
+    videoPlayer.playbackRate = parseFloat(currentRate);
+  });
+
   videoFileInput.addEventListener('change', (event) => {
     const file = event.target.files[0];
     if (!file) return;
