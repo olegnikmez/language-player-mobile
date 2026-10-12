@@ -542,6 +542,33 @@ window.addEventListener('load', function() {
   let pauseWas = 0;
   let loopMode = 0; // 0: нет, 1: файл, 2: фраза, 3: выделенные
 
+  let lastSaveTime = 0;
+
+  // Троттлинг сохранения (раз в 1 секунду при воспроизведении)
+  videoPlayer.addEventListener('timeupdate', () => {
+    if (!fileName || !fileSize) return;
+    
+    const now = performance.now();
+    if (now - lastSaveTime > 1000) {
+      localStorage.setItem(`${fileName}_${fileSize}`, videoPlayer.currentTime);
+      lastSaveTime = now;
+    }
+  });
+
+  // Гарантированное сохранение точной позиции при остановке
+  videoPlayer.addEventListener('pause', () => {
+    if (fileName && fileSize) {
+      localStorage.setItem(`${fileName}_${fileSize}`, videoPlayer.currentTime);
+    }
+  });
+
+  // Сохранение стейта при сворачивании браузера или закрытии вкладки
+  window.addEventListener('pagehide', () => {
+    if (fileName && fileSize && !videoPlayer.paused) {
+      localStorage.setItem(`${fileName}_${fileSize}`, videoPlayer.currentTime);
+    }
+  });
+
   // ==========================================
   // УПРАВЛЕНИЕ СКОРОСТЬЮ ВОСПРОИЗВЕДЕНИЯ
   // ==========================================
@@ -574,6 +601,19 @@ window.addEventListener('load', function() {
   videoPlayer.addEventListener('loadedmetadata', () => {
     const currentRate = localStorage.getItem('playbackRate') || '1';
     videoPlayer.playbackRate = parseFloat(currentRate);
+
+    if (fileName && fileSize) {
+      const storedTime = localStorage.getItem(`${fileName}_${fileSize}`);
+      if (storedTime) {
+        videoPlayer.currentTime = parseFloat(storedTime);
+      }
+    }
+
+    // Примусово синхронізуємо повзунок, час та субтитри без запуску відео
+    const tempTracking = isTracking;
+    isTracking = true;
+    trackPlayback();
+    isTracking = tempTracking;
   });
 
   videoFileInput.addEventListener('change', (event) => {
@@ -588,10 +628,6 @@ window.addEventListener('load', function() {
 
     videoPlayer.src = URL.createObjectURL(file);
     
-    let storedCurrentTime = localStorage.getItem(fileName + '_' + fileSize); 
-    if (storedCurrentTime) { 
-      videoPlayer.currentTime = storedCurrentTime; 
-    } 
   });
 
   subtitlesTopInput.addEventListener('change', (event) => {
@@ -990,7 +1026,6 @@ window.addEventListener('load', function() {
       });
       
       oldIndex = currentSubtitleTopIndex;
-      localStorage.setItem(fileName + '_' + fileSize, currentTime);
 
       if (!isTranslationLocked) {
         restoreBottomSubtitle();
@@ -1089,6 +1124,14 @@ window.addEventListener('load', function() {
   if (audioProgressBar) {
     audioProgressBar.addEventListener('input', (e) => {
       videoPlayer.currentTime = (e.target.value / 100) * videoPlayer.duration;
+      
+      // Синхронізуємо інтерфейс, якщо тягнемо повзунок на паузі
+      if (videoPlayer.paused) {
+        const tempTracking = isTracking;
+        isTracking = true;
+        trackPlayback();
+        isTracking = tempTracking;
+      }
     });
   }
 
