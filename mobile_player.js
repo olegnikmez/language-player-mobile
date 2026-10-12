@@ -59,6 +59,7 @@ const uiTranslations = {
     hotkeyS: "Повторити поточну фразу",
     hotkeyD: "Вперед (наступна фраза)",
 
+    hideVideoLabel: "Приховати вікно відео (тільки аудіо)",
     systemDataTitle: "Скидання даних",
     resetSettingsBtn: "Скинути всі налаштування",
     confirmReset: "Ви впевнені, що хочете видалити всі збережені налаштування та кеш? Додаток буде перезавантажено."
@@ -120,6 +121,7 @@ const uiTranslations = {
     hotkeyS: "Повторить текущую фразу",
     hotkeyD: "Вперед (следующая фраза)",
 
+    hideVideoLabel: "Скрыть окно видео (только аудио)",
     systemDataTitle: "Сброс данных",
     resetSettingsBtn: "Сбросить все настройки",
     confirmReset: "Вы уверены, что хотите удалить все сохраненные настройки и кэш? Приложение будет перезагружено."
@@ -181,6 +183,7 @@ const uiTranslations = {
     hotkeyS: "Repeat current phrase",
     hotkeyD: "Forward (next phrase)",
 
+    hideVideoLabel: "Hide video screen (audio only)",
     systemDataTitle: "Reset data",
     resetSettingsBtn: "Reset all settings",
     confirmReset: "Are you sure you want to clear all saved settings and cache? The app will reload."
@@ -242,6 +245,7 @@ const uiTranslations = {
     hotkeyS: "Aktuelle Phrase wiederholen",
     hotkeyD: "Vor (nächste Phrase)",
 
+    hideVideoLabel: "Videobildschirm ausblenden (nur Audio)",
     systemDataTitle: "Daten zurücksetzen",
     resetSettingsBtn: "Alle Einstellungen zurücksetzen",
     confirmReset: "Sind Sie sicher, dass Sie alle gespeicherten Einstellungen und den Cache löschen möchten? Die App wird neu geladen."
@@ -303,6 +307,7 @@ const uiTranslations = {
     hotkeyS: "Repetir frase actual",
     hotkeyD: "Adelante (frase siguiente)",
 
+    hideVideoLabel: "Ocultar pantalla de video (solo audio)",
     systemDataTitle: "Restablecer datos",
     resetSettingsBtn: "Restablecer todos los ajustes",
     confirmReset: "¿Está seguro de que desea borrar todas las configuraciones guardadas y el caché? La aplicación se recargará."
@@ -364,6 +369,7 @@ const uiTranslations = {
     hotkeyS: "Répéter la phrase actuelle",
     hotkeyD: "Suivant (phrase suivante)",
 
+    hideVideoLabel: "Masquer l'écran vidéo (audio uniquement)",
     systemDataTitle: "Réinitialiser les données",
     resetSettingsBtn: "Réinitialiser tous les paramètres",
     confirmReset: "Êtes-vous sûr de vouloir effacer tous les paramètres enregistrés et le cache ? L'application va redémarrer."
@@ -458,6 +464,46 @@ window.addEventListener('load', function() {
   if (customProxyUrlInput) customProxyUrlInput.addEventListener('change', (e) => localStorage.setItem('customProxyUrl', e.target.value));
   if (customProxyTokenInput) customProxyTokenInput.addEventListener('change', (e) => localStorage.setItem('customProxyToken', e.target.value));
 
+  // Инициализация чекбокса hideVideo
+  const hideVideoCheckbox = document.getElementById('hideVideo');
+
+  const savedHideVideo = localStorage.getItem("hideVideoCheckbox");
+  if (hideVideoCheckbox && savedHideVideo !== null) {
+    hideVideoCheckbox.checked = savedHideVideo === "true";
+  }
+
+  // Вспомогательная функция определения аудио
+  function isAudioFile(file) {
+    if (!file) return false;
+    if (file.type.startsWith('audio/')) return true;
+    
+    // Fallback: проверка по расширению
+    const ext = file.name.split('.').pop().toLowerCase();
+    const audioExts = ['m4a', 'm4b', 'ogg', 'mp3', 'wav', 'flac', 'aac', 'wma'];
+    return audioExts.includes(ext);
+  }
+
+  // Обновление видимости контейнера
+  function updateVideoVisibility() {
+    const file = videoFileInput ? videoFileInput.files[0] : null;
+    const forceHide = hideVideoCheckbox ? hideVideoCheckbox.checked : false;
+    
+    // Скрываем, если включен принудительный флаг ИЛИ файл автоматически определен как аудио
+    if (forceHide || (file && isAudioFile(file))) {
+      videoContainerBox.style.display = 'none';
+    } else if (file) {
+      videoContainerBox.style.display = 'block';
+    }
+  }
+
+  // Сохранение настройки и мгновенное применение
+  if (hideVideoCheckbox) {
+    hideVideoCheckbox.addEventListener('change', function() {
+      localStorage.setItem("hideVideoCheckbox", this.checked);
+      updateVideoVisibility(); 
+    });
+  }
+
   // ==========================================
   // 2. НАВИГАЦИЯ МЕЖДУ ЭКРАНАМИ
   // ==========================================
@@ -503,11 +549,8 @@ window.addEventListener('load', function() {
     fileSize = file.size; 
     fileName = file.name; 
 
-    if (file.type.startsWith('audio/')) {
-      videoContainerBox.style.display = 'none';
-    } else {
-      videoContainerBox.style.display = 'block';
-    }
+    // Используем новую функцию вместо старой проверки file.type.startsWith('audio/')
+    updateVideoVisibility();
 
     videoPlayer.src = URL.createObjectURL(file);
     
@@ -515,9 +558,6 @@ window.addEventListener('load', function() {
     if (storedCurrentTime) { 
       videoPlayer.currentTime = storedCurrentTime; 
     } 
-
-    // settingsScreen.classList.add('d-none');
-    // playerScreen.classList.remove('d-none');
   });
 
   subtitlesTopInput.addEventListener('change', (event) => {
