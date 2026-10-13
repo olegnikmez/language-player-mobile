@@ -1113,7 +1113,7 @@ window.addEventListener('load', function() {
     // =====================================
     // ЛОГИКА АВТОПАУЗЫ И ЗАЦИКЛИВАНИЯ (STATE MACHINE)
     // =====================================
-    const safetyBuffer = 0.02; 
+    const safetyBuffer = 0.05; 
     let handledByLoop3 = false;
 
     if (loopMode === 3) {
