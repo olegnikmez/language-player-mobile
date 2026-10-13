@@ -1155,9 +1155,9 @@ window.addEventListener('load', function() {
           } else if (loopMode === 0 || loopMode === 1) {
             if (stopAfterSubtitleCheckbox && stopAfterSubtitleCheckbox.checked) {
               videoPlayer.pause();
-              // Фиксируем таймер точно на конце фразы. 
-              // Это идеально состыкуется с нашим предыдущим фиксом функции getActiveSubtitleIndex()
-              videoPlayer.currentTime = et; 
+              // Фиксируем таймер строго внутри текущей фразы (чуть раньше конца)
+              videoPlayer.currentTime = et - 0.01; 
+              lastTrackedTime = videoPlayer.currentTime; // Предотвращаем баги переходов
             }
           }
           break; // Обрабатываем только одну границу за кадр
@@ -1230,6 +1230,8 @@ window.addEventListener('load', function() {
   if (audioProgressBar) {
     audioProgressBar.addEventListener('input', (e) => {
       videoPlayer.currentTime = (e.target.value / 100) * videoPlayer.duration;
+
+      lastTrackedTime = videoPlayer.currentTime;
       
       // Синхронізуємо інтерфейс, якщо тягнемо повзунок на паузі
       if (videoPlayer.paused) {
@@ -1284,10 +1286,10 @@ window.addEventListener('load', function() {
     if (!subtitlesTop.length) return -1;
     const time = videoPlayer.currentTime;
     
-    // Ищем с конца. Отнимаем 0.15 сек от текущего времени, 
-    // чтобы плеер "считал" себя в предыдущей фразе, если он остановился ровно на границе
+    // Ищем с конца, используя точное время + микро-допуск (0.01с) 
+    // вместо старого хака time - 0.15
     for (let i = subtitlesTop.length - 1; i >= 0; i--) {
-      if (subtitlesTop[i].startTime <= time - 0.15) {
+      if (subtitlesTop[i].startTime <= time + 0.01) {
         return i;
       }
     }
@@ -1300,9 +1302,9 @@ window.addEventListener('load', function() {
     if (idx !== -1) {
       const prevIdx = Math.max(0, idx - 1);
       videoPlayer.currentTime = subtitlesTop[prevIdx].startTime;
+      lastTrackedTime = videoPlayer.currentTime; // Синхронизируем трекер
       videoPlayer.play();
     }
-
     resetSlowReplay();
   });
 
@@ -1311,9 +1313,9 @@ window.addEventListener('load', function() {
     const idx = getActiveSubtitleIndex();
     if (idx !== -1) {
       videoPlayer.currentTime = subtitlesTop[idx].startTime;
+      lastTrackedTime = videoPlayer.currentTime; // Синхронизируем трекер
       videoPlayer.play();
     }
-
     resetSlowReplay();
   });
 
@@ -1323,9 +1325,9 @@ window.addEventListener('load', function() {
     // Блокируем переход за пределы массива
     if (idx !== -1 && idx < subtitlesTop.length - 1) {
       videoPlayer.currentTime = subtitlesTop[idx + 1].startTime;
+      lastTrackedTime = videoPlayer.currentTime; // Синхронизируем трекер
       videoPlayer.play();
     }
-
     resetSlowReplay();
   });
 
@@ -1372,6 +1374,7 @@ window.addEventListener('load', function() {
       const subtitleDiv = jumpBtn.closest('.subtitle');
       if (subtitleDiv) {
         videoPlayer.currentTime = parseFloat(subtitleDiv.getAttribute('start'));
+        lastTrackedTime = videoPlayer.currentTime;
         videoPlayer.play();
       }
       return;
