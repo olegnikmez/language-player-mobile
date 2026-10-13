@@ -518,6 +518,14 @@ window.addEventListener('load', function() {
   document.getElementById('btnGoPlayer').addEventListener('click', () => {
     settingsScreen.classList.add('d-none');
     playerScreen.classList.remove('d-none');
+    
+    // КРИТИЧЕСКИЙ ФИКС: Форсируем пересчет после возврата в плеер.
+    // Контейнер снова стал видимым и имеет реальные размеры для расчета скролла.
+    oldIndex = -1; 
+    const tempTracking = isTracking;
+    isTracking = true;
+    trackPlayback();
+    isTracking = tempTracking;
   });
 
   // ==========================================
@@ -589,6 +597,10 @@ window.addEventListener('load', function() {
   // Слушатель изменения скорости пользователем
   if (playbackRateSelect) {
     playbackRateSelect.addEventListener('change', (e) => {
+      // Если пользователь сам тронул селектор — убиваем стейт медленного повтора,
+      // чтобы trackPlayback не перезаписал его выбор при окончании фразы
+      slowReplayState.isActive = false; 
+      
       const rate = parseFloat(e.target.value);
       videoPlayer.playbackRate = rate;
       localStorage.setItem('playbackRate', e.target.value);
@@ -610,10 +622,13 @@ window.addEventListener('load', function() {
     }
 
     // Примусово синхронізуємо повзунок, час та субтитри без запуску відео
+    oldIndex = -1; 
     const tempTracking = isTracking;
     isTracking = true;
     trackPlayback();
     isTracking = tempTracking;
+
+    resetSlowReplay();
   });
 
   videoFileInput.addEventListener('change', (event) => {
@@ -638,8 +653,13 @@ window.addEventListener('load', function() {
     reader.onload = (event) => {
       subtitlesTop = parseSrt(event.target.result);
       loadTopSubtitles();
-      // settingsScreen.classList.add('d-none');
-      // playerScreen.classList.remove('d-none');
+      
+      // Синхронизируем с текущим временем видео сразу после парсинга
+      oldIndex = -1;
+      const tempTracking = isTracking;
+      isTracking = true;
+      trackPlayback();
+      isTracking = tempTracking;
     }
   });
 
@@ -949,11 +969,39 @@ window.addEventListener('load', function() {
     return m + ":" + (s < 10 ? "0" : "") + s;
   }
 
+  // 100% надежная плавная прокрутка с эффектом замедления (easing)
+  function smoothScroll(element, target, duration) {
+    const start = element.scrollTop;
+    const change = target - start;
+    const startTime = performance.now();
+
+    function animate(currentTime) {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      
+      // Математика замедления (easeOutQuart) - текст останавливается очень мягко
+      const ease = 1 - Math.pow(1 - progress, 4);
+      element.scrollTop = start + change * ease;
+
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      }
+    }
+    requestAnimationFrame(animate);
+  }
+
   // НОВАЯ ФУНКЦИЯ ТРЕКИНГА (Вызывается ~60 раз в секунду)
   function trackPlayback() {
     if (!isTracking) return;
 
     const currentTime = videoPlayer.currentTime;
+
+    // --- ИНЪЕКЦИЯ КОНТРОЛЯ МЕДЛЕННОГО ПОВТОРА ---
+    if (slowReplayState.isActive) {
+      if (videoPlayer.paused || currentTime >= slowReplayState.endTime - 0.05 || currentTime < (slowReplayState.startTime - 0.1)) {
+        resetSlowReplay();
+      }
+    }
     
     // Вычисляем дельту времени. Если она от 0 до 0.5 сек — это естественное воспроизведение (не ручная перемотка)
     const timeDelta = currentTime - lastTrackedTime;
@@ -1018,7 +1066,6 @@ window.addEventListener('load', function() {
     if (oldIndex !== currentSubtitleTopIndex) {
       const container = document.getElementById('allTopSubs');
       const cRect = container.getBoundingClientRect();
-      const isMovingDown = currentSubtitleTopIndex > oldIndex;
 
       const subtitlesElements = document.querySelectorAll('.subtitle');
       subtitlesElements.forEach((subtitle) => {
@@ -1027,40 +1074,30 @@ window.addEventListener('load', function() {
         if (subNumber === currentSubtitleTopIndex) {
           subtitle.classList.add('subtitleCurrent');
 
-          const next1 = subtitle.nextElementSibling;
-          const next2 = next1 ? next1.nextElementSibling : null;
-          const prev1 = subtitle.previousElementSibling;
-          const prev2 = prev1 ? prev1.previousElementSibling : null;
+          // --- ЛОГИКА "СТРАНИЧНОЙ" ПРОКРУТКИ СВЕРХУ ВНИЗ ---
+          const sRect = subtitle.getBoundingClientRect();
+          
+          // Отступ сверху (на каком расстоянии от верхнего края фиксировать фразу при скролле)
+          const topOffset = 40; 
+          // Отступ снизу (нижняя граница видимости, при касании которой сработает автоскролл)
+          const bottomSafeZone = 30; 
 
-          if (isMovingDown) {
-            let needsScroll = false;
-            if (next2) {
-              if (next2.getBoundingClientRect().bottom > cRect.bottom) needsScroll = true;
-            } else if (next1) {
-              if (next1.getBoundingClientRect().bottom > cRect.bottom) needsScroll = true;
-            } else {
-              if (subtitle.getBoundingClientRect().bottom > cRect.bottom) needsScroll = true;
-            }
+          // Проверяем, вышла ли фраза за пределы комфортной видимости
+          const isAbove = sRect.top < (cRect.top + topOffset);
+          const isBelow = sRect.bottom > (cRect.bottom - bottomSafeZone);
 
-            if (needsScroll) {
-              if (prev1) prev1.scrollIntoView({ behavior: 'smooth', block: 'start' });
-              else subtitle.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-          } else {
-            let needsScroll = false;
-            if (prev2) {
-              if (prev2.getBoundingClientRect().top < cRect.top) needsScroll = true;
-            } else if (prev1) {
-              if (prev1.getBoundingClientRect().top < cRect.top) needsScroll = true;
-            } else {
-              if (subtitle.getBoundingClientRect().top < cRect.top) needsScroll = true;
-            }
+          // Крутим только если фраза ушла за экран вверх (кнопка "Назад") 
+          // ИЛИ достигла низа экрана (обычное воспроизведение / кнопка "Вперед")
+          if (isAbove || isBelow) {
+            // Вычисляем позицию скролла, чтобы примагнитить активную фразу почти в самый верх
+            const elementRelativeTop = sRect.top - cRect.top;
+            const targetScrollTop = container.scrollTop + elementRelativeTop - topOffset;
 
-            if (needsScroll) {
-              if (next1) next1.scrollIntoView({ behavior: 'smooth', block: 'end' });
-              else subtitle.scrollIntoView({ behavior: 'smooth', block: 'end' });
-            }
+            // Вызываем нашу кастомную функцию (350 миллисекунд - оптимальное время)
+            smoothScroll(container, targetScrollTop, 350);
           }
+          // ------------------------------------------------
+          
         } else {
           subtitle.classList.remove('subtitleCurrent');
         }
@@ -1147,6 +1184,49 @@ window.addEventListener('load', function() {
     }
   });
 
+  // ==========================================
+  // КОНТРОЛЛЕР ЛОКАЛЬНОГО ТЕМПОРАЛЬНОГО ИСКАЖЕНИЯ (W)
+  // ==========================================
+  const slowReplayState = {
+    isActive: false,
+    startTime: 0,
+    endTime: 0,
+    originalRate: 1.0
+  };
+
+  function resetSlowReplay() {
+    // Всегда возвращаем скорость из селектора или памяти, 
+    // даже если стейт по какой-то причине сбросился раньше
+    const targetRate = playbackRateSelect ? parseFloat(playbackRateSelect.value) : slowReplayState.originalRate;
+    
+    slowReplayState.isActive = false;
+    videoPlayer.playbackRate = targetRate;
+  }
+
+  function triggerSlowReplay() {
+    const idx = getActiveSubtitleIndex();
+    if (idx === -1) return;
+
+    const phrase = subtitlesTop[idx];
+    
+    // Если мы еще не в режиме медленного проигрывания — запоминаем текущую скорость плеера
+    if (!slowReplayState.isActive) {
+      slowReplayState.originalRate = videoPlayer.playbackRate;
+    }
+
+    slowReplayState.isActive = true;
+    slowReplayState.startTime = phrase.startTime;
+    slowReplayState.endTime = phrase.endTime;
+
+    videoPlayer.playbackRate = 0.7;
+
+    videoPlayer.currentTime = phrase.startTime;
+    
+    if (videoPlayer.paused) {
+      videoPlayer.play();
+    }
+}
+
   if (audioProgressBar) {
     audioProgressBar.addEventListener('input', (e) => {
       videoPlayer.currentTime = (e.target.value / 100) * videoPlayer.duration;
@@ -1187,11 +1267,15 @@ window.addEventListener('load', function() {
     // ИЗМЕНЕНИЕ: Останавливаем цикл при паузе
     isTracking = false;
     if (animFrameId) cancelAnimationFrame(animFrameId);
+
+    resetSlowReplay();
   });
 
   document.getElementById('btnPlayPause').addEventListener('click', () => {
     if (videoPlayer.paused) videoPlayer.play();
     else videoPlayer.pause();
+
+    resetSlowReplay();
   });
 
   // Вспомогательная функция для точного определения текущей фразы
@@ -1218,6 +1302,8 @@ window.addEventListener('load', function() {
       videoPlayer.currentTime = subtitlesTop[prevIdx].startTime;
       videoPlayer.play();
     }
+
+    resetSlowReplay();
   });
 
   // Повторить (S)
@@ -1227,6 +1313,8 @@ window.addEventListener('load', function() {
       videoPlayer.currentTime = subtitlesTop[idx].startTime;
       videoPlayer.play();
     }
+
+    resetSlowReplay();
   });
 
   // Вперед (D)
@@ -1237,6 +1325,8 @@ window.addEventListener('load', function() {
       videoPlayer.currentTime = subtitlesTop[idx + 1].startTime;
       videoPlayer.play();
     }
+
+    resetSlowReplay();
   });
 
   /*document.getElementById('btnPrevSub').addEventListener('click', () => {
@@ -1522,18 +1612,20 @@ window.addEventListener('load', function() {
   // 8. ГЛОБАЛЬНЫЕ ГОРЯЧИЕ КЛАВИШИ ДЛЯ ПК
   // ==========================================
   window.addEventListener('keydown', function(e) {
-    // Игнорируем нажатия, если пользователь вводит текст в инпуты (в настройках)
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-    
+
     if (e.code === 'Space') {
-      e.preventDefault(); // Блокируем стандартную прокрутку страницы пробелом
-      document.getElementById('btnPlayPause').click(); // Плей/Пауза
+      e.preventDefault();
+      document.getElementById('btnPlayPause').click();
     } else if (e.code === 'KeyA') {
-      document.getElementById('btnPrevSub').click(); // Назад
+      document.getElementById('btnPrevSub').click();
     } else if (e.code === 'KeyS') {
-      document.getElementById('btnRepeatSub').click(); // Повторить
+      document.getElementById('btnRepeatSub').click();
     } else if (e.code === 'KeyD') {
-      document.getElementById('btnNextSub').click(); // Вперед
+      document.getElementById('btnNextSub').click();
+    } else if (e.code === 'KeyW') { 
+      e.preventDefault();                 
+      triggerSlowReplay();                
     }
   });
 
